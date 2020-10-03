@@ -34,6 +34,8 @@ require('./config/database.config.js');
 
 require('dotenv/config');
 
+require('./routes/fundoo.notes.js')(app);
+
 /**
  * listen for requests
  */
