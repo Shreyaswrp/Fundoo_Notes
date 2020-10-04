@@ -1,3 +1,19 @@
+/*************************************************************
+ *
+ * Execution       : default node cmd> node user.controller.js
+ * Purpose         : Define actions for various http methods
+ *
+ * @description    : Actions to be done when http methods are called. 
+ *                   
+ *                               
+ * @file           : user.controller.js
+ * @overview       : Actions of http methods
+ * @module         : controller
+ * @version        : 1.0
+ * @since          : 16/11/2020
+ *
+ * **********************************************************/
+
 const userService = require('../services/user.service.js');
 const Joi = require("joi");
 

@@ -41,6 +41,7 @@ class UserModel {
                   email: data.email,
                   password: hash,
             });
+        //save user in database    
         user.save();
         callback(null, user);
         });
