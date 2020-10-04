@@ -72,6 +72,27 @@ class UserRegistration {
         });
         }
     }    
+
+  /**
+    * @params {object} data
+    * Retrieve and return all users from the database.
+    */
+    findAllUsers = (req,res) => {
+    var responseResult = {};
+    userService.findAllUsers(req.body, function(err, data) {
+        if (err) {
+            responseResult.success = false;
+            responseResult.error = err;
+            responseResult.message = "Could not find users";
+            res.status(422).send(responseResult);
+        }else{
+            responseResult.success = true;
+            responseResult.data = data;
+            responseResult.message = "Users found successfully.";
+            res.status(200).send(responseResult);
+        }
+    });
+    }
 }
 
 module.exports = UserRegistration;

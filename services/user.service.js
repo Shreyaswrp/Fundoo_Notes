@@ -15,6 +15,20 @@ class UserService {
             }
         })
     }
+
+  /**
+    * @params {object} data
+    * @params {callback function} callback
+    */
+    findAllUsers = (data,callback) => {
+        USER.findAllUsers(data,function(err, result) {
+            if (err) {
+                callback(err,null);
+            }else{
+                callback(null, result);
+            }
+        })
+    }
 }
 
 module.exports = new UserService();

@@ -49,7 +49,17 @@ class UserModel {
         catch(err){
         callback(err,null);
         }
-    }  
+    }
+
+  /**
+    * Retrieve and return all users from the database.
+    */
+    findAllUsers = (data,callback) => {
+        USER.find(data,function(err,result) {
+            if(err)return callback(err,null);
+            return callback(null,result);
+        })
+    }
 }
 
 module.exports = new UserModel();

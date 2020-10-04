@@ -12,4 +12,7 @@ module.exports = (app) => {
 
     // Create a new User
     app.post('/create-user', user.createUser);
+
+    // Retrieve all Users
+    app.get('/find-users', user.findAllUsers);
 }
