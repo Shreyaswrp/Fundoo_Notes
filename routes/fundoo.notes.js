@@ -1,3 +1,6 @@
+const userRegistration = require('../controller/user.controller.js');
+var user = new userRegistration();
+
 module.exports = (app) => {
     
     /**
@@ -6,5 +9,7 @@ module.exports = (app) => {
     app.get('/', (req, res) => {
         res.json("Welcome to Fundoo Notes application.");
     });
-    
+
+    // Create a new User
+    app.post('/create-user', user.createUser);
 }
