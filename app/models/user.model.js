@@ -67,7 +67,14 @@ class UserModel {
     findOneUser = (idUser,callback) => {
         USER.findById(idUser,function(err,data){
             if(err)return callback(err,null);
-            return callback(null,data);
+            else{
+                if(data == null){
+                callback(null,'not_found');
+                }else{
+                callback(null,data);
+                }
+            }
+            
         })
     }
 
@@ -103,11 +110,41 @@ class UserModel {
         try{
         USER.findByIdAndDelete(idGreeting, function(err,post){
             if (err) return next(err);
+            else{
+            if(post == null){
+            callback(null,'not_found');
+            }
+            else{   
             callback(null,'User deleted successfully');
+            }
+            }
         })
         }catch(err){
             callback(err,null);
         }
+    }
+
+    loginUser = (data,callback) => {
+        USER.findOne({ email: data.email }, (err,result) => {
+            if (err) {
+                callback(err);
+            }else if( result != null ){
+                if(bcrypt.compare(data.password, result.password)){
+                    let resultData = {
+                        message: "success",
+                        id: result._id,
+                        firstName: result.firstName,
+                        lastName: result.lastName,
+                        email: result.email
+                    }
+                    callback(null, resultData);
+                }else{
+                    callback("password not correct");
+                }   
+            }else{
+                callback("user not found");
+            }     
+        })
     }
 }
 

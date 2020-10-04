@@ -71,6 +71,20 @@ class UserService {
             }
         })
     }
+
+  /**
+    * @params {object} data
+    * @params {callback function} callback
+    */
+    loginUser = (data, callback) => {
+        USER.loginUser(data, (err, result) => {
+            if(err) {
+                callback(err, null);
+            }else {
+                callback(null, result);
+            }
+        })
+    }
 }
 
 module.exports = new UserService();

@@ -112,7 +112,13 @@ class UserRegistration {
             responseResult.error = err;
             responseResult.message = "Could not find a user with the given id";
             res.status(422).send(responseResult);   
-        }else{
+        }else if(data == 'not_found'){
+            responseResult.success = false;
+            responseResult.data = data;
+            responseResult.message = "User not found ";
+            res.status(404).send(responseResult);
+        }
+        else{
             responseResult.success = true;
             responseResult.data = data;
             responseResult.message = "found a user with the id provided successfully.";
@@ -164,6 +170,11 @@ class UserRegistration {
                 responseResult.error = err;
                 responseResult.message = "Could not delete user with the given id";
                 res.status(422).send(responseResult);
+            }else if(data == 'not_found'){
+                responseResult.success = false;
+                responseResult.data = data;
+                responseResult.message = "User not found ";
+                res.status(404).send(responseResult);
             }else{
                 responseResult.success = true;
                 responseResult.data = data;
@@ -171,6 +182,35 @@ class UserRegistration {
                 res.status(200).send(responseResult);
             }
         });
+    }
+
+    loginUser = (req, res) => {
+        var responseResult = {};
+
+        //validate request
+        const { error } = this.validateMessage(req.body);
+
+        if(error) {
+            responseResult.success = false;
+            responseResult.message = "login failed";
+            responseResult.error = error;
+            res.status(422).send(responseResult)
+        }else{
+        userService.loginUser(req.body, function(err, result){
+            if(err){
+                responseResult.success = false;
+                responseResult.message = "login failed";
+                responseResult.error = err;
+                res.status(422).send(responseResult) 
+            }else{
+                responseResult.success = true;
+                responseResult.data = result;
+                responseResult.message = "logged in successfully.";
+                res.status(200).send(responseResult);
+            }
+        });
+        }
+
     }
 }
 

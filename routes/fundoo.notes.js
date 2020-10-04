@@ -24,4 +24,7 @@ module.exports = (app) => {
 
     // Delete a User with userId
     app.delete('/delete-user/:userId', user.deleteUser);
+
+    //routes to register controller with path /login
+    app.post('/login',user.loginUser);
 }
