@@ -62,13 +62,28 @@ class UserModel {
     }
 
   /**
-    * Find a single greeting with a greetingId
+    * Find a single user with a userId
     */
     findOneUser = (idUser,callback) => {
         USER.findById(idUser,function(err,data){
             if(err)return callback(err,null);
             return callback(null,data);
         })
+    }
+
+  /**
+    * Update a user identified by the userId in the request
+    */
+    updateUser = (id, data, callback) => {
+        try{
+        USER.findByIdAndUpdate(id, data, function (err, post){
+            if (err) return next(err);
+            callback(null, post);
+        })
+        }
+        catch(err) {
+            callback(err,null);
+        }    
     }
 }
 

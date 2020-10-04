@@ -118,7 +118,33 @@ class UserRegistration {
             res.status(200).send(responseResult);
         }
     });
-}
+    }
+
+  /**
+    * @params {object} data
+    * Update users from the database.
+    */
+    updateUser = (req, res) => {
+        var responseResult = {};
+
+        let regexConst = new RegExp(/^[a-fA-F0-9]{24}$/);
+        if(!regexConst.test(req.params.userId)){
+            return res.status(422).send({message: "Incorrect id.Give proper id. "});
+        }
+        userService.updateUser(req.params.userId, req.body, function(err, data) {
+            if (err) {
+                responseResult.success = false;
+                responseResult.error = err;
+                responseResult.message = "Could not update user with the given id";
+                res.status(422).send(responseResult); 
+            }else{
+                responseResult.success = true;
+                responseResult.data = data;
+                responseResult.message = "User updated successfully.";
+                res.status(200).send(responseResult);
+            }
+        });
+    }
 }
 
 module.exports = UserRegistration;

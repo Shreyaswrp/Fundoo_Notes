@@ -43,6 +43,20 @@ class UserService {
             }
         })
     }
+
+  /**
+    * @params {object} data
+    * @params {callback function} callback
+    */
+    updateUser = (id, data, callback) => {
+        USER.updateUser(id, data, (err, result) => {
+            if (err) {
+                callback(err,null);
+            } else {
+                callback(null, result);
+            }
+        })
+    }
 }
 
 module.exports = new UserService();
