@@ -75,11 +75,21 @@ class UserModel {
     * Update a user identified by the userId in the request
     */
     updateUser = (id, data, callback) => {
+        let saltRounds = 10;
         try{
-        USER.findByIdAndUpdate(id, data, function (err, post){
-            if (err) return next(err);
-            callback(null, post);
-        })
+        bcrypt.hash(data.password, saltRounds, function (err, hash) {
+            // Store password in hash form in DB
+            const updateContent = {
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
+                password: hash,
+            };
+            USER.findByIdAndUpdate(id, updateContent, function (err, post){
+                if (err) return next(err);
+                callback(null, post);
+            });
+        });
         }
         catch(err) {
             callback(err,null);
