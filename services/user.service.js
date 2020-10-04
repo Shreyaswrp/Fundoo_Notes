@@ -57,6 +57,20 @@ class UserService {
             }
         })
     }
+
+  /**
+    * @params {object} data
+    * @params {callback function} callback
+    */
+    deleteUser = (data, callback) => {
+        USER.deleteUser(data, (err, result) => {
+            if (err) {
+                callback(err,null);
+            } else {
+                callback(null, result);
+            }
+        })
+    }
 }
 
 module.exports = new UserService();

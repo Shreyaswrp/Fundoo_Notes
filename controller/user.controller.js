@@ -100,11 +100,12 @@ class UserRegistration {
     */
     findOneUser = (req, res) => {
     var responseResult = {};
-
+    
     let regexConst = new RegExp(/^[a-fA-F0-9]{24}$/);
     if(!regexConst.test(req.params.userId)){
         return res.status(422).send({message: "Incorrect id.Give proper id. "});
     }
+    
     userService.findOneUser(req.params.userId, function(err, data) {
         if (err) {
             responseResult.success = false;
@@ -141,6 +142,32 @@ class UserRegistration {
                 responseResult.success = true;
                 responseResult.data = data;
                 responseResult.message = "User updated successfully.";
+                res.status(200).send(responseResult);
+            }
+        });
+    }
+
+  /**
+    * @params {object} data
+    * Delete users from the database.
+    */
+    deleteUser = (req, res) => {
+        var responseResult = {};
+    
+        let regexConst = new RegExp(/^[a-fA-F0-9]{24}$/);
+        if(!regexConst.test(req.params.userId)){
+            return res.send({message: "Incorrect id.Give proper id. "});
+        }
+        userService.deleteUser(req.params.userId, function(err, data) {
+            if (err) {
+                responseResult.success = false;
+                responseResult.error = err;
+                responseResult.message = "Could not delete user with the given id";
+                res.status(422).send(responseResult);
+            }else{
+                responseResult.success = true;
+                responseResult.data = data;
+                responseResult.message = "User deleted ";
                 res.status(200).send(responseResult);
             }
         });

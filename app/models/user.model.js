@@ -85,6 +85,20 @@ class UserModel {
             callback(err,null);
         }    
     }
+
+  /**
+    * Delete a user with the specified userId in the request
+    */
+    deleteUser = (idGreeting,callback) => {
+        try{
+        USER.findByIdAndDelete(idGreeting, function(err,post){
+            if (err) return next(err);
+            callback(null,'User deleted successfully');
+        })
+        }catch(err){
+            callback(err,null);
+        }
+    }
 }
 
 module.exports = new UserModel();
