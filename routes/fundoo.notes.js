@@ -15,4 +15,7 @@ module.exports = (app) => {
 
     // Retrieve all Users
     app.get('/find-users', user.findAllUsers);
+
+     // Retrieve a single User with userId
+     app.get('/find-a-user/:userId', user.findOneUser);
 }

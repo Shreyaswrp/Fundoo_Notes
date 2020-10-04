@@ -93,6 +93,32 @@ class UserRegistration {
         }
     });
     }
+
+  /**
+    * @params {object} data
+    * Retrieve and return a user from the database.
+    */
+    findOneUser = (req, res) => {
+    var responseResult = {};
+
+    let regexConst = new RegExp(/^[a-fA-F0-9]{24}$/);
+    if(!regexConst.test(req.params.userId)){
+        return res.status(422).send({message: "Incorrect id.Give proper id. "});
+    }
+    userService.findOneUser(req.params.userId, function(err, data) {
+        if (err) {
+            responseResult.success = false;
+            responseResult.error = err;
+            responseResult.message = "Could not find a user with the given id";
+            res.status(422).send(responseResult);   
+        }else{
+            responseResult.success = true;
+            responseResult.data = data;
+            responseResult.message = "found a user with the id provided successfully.";
+            res.status(200).send(responseResult);
+        }
+    });
+}
 }
 
 module.exports = UserRegistration;

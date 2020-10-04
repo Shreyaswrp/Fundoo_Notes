@@ -60,6 +60,16 @@ class UserModel {
             return callback(null,result);
         })
     }
+
+  /**
+    * Find a single greeting with a greetingId
+    */
+    findOneUser = (idUser,callback) => {
+        USER.findById(idUser,function(err,data){
+            if(err)return callback(err,null);
+            return callback(null,data);
+        })
+    }
 }
 
 module.exports = new UserModel();
