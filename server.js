@@ -18,6 +18,7 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const routes = require('./routes/userRt.js');
 
 /**
  * create express app
@@ -30,16 +31,21 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // parse requests of content-type - application/json
 app.use(bodyParser.json())
 
+app.use(routes);
+
+//Define a simple route to display Message at the homepage
+app.get('/', (req, res) => {
+        res.json("Welcome to Fundoo Notes application.");
+});
+
 require('./config/database.config.js');
 
 require('dotenv/config');
 
-require('./routes/fundoo.notes.js')(app);
-
 /**
  * listen for requests
  */
-const PORT = process.env.port || 5000;
+const PORT = process.env.PORT;
 app.listen( PORT, () => {
     console.log("Server is listening on port"+" " +PORT);
 });
