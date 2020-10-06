@@ -16,6 +16,9 @@
 
 const userService = require('../service/userService.js');
 const Utility = require('../Utility/Utility.js');
+var api_key = 'XXXXXXXXXXXXXXXXXXXXXXX';
+var domain = 'www.mydomain.com';
+var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
 
 class UserRegistration {
 
@@ -35,10 +38,16 @@ class UserRegistration {
         userService.registerUser(user, function(err, result){
             if(err){
                 responseResult.success = false;
-                responseResult.message = "Could not create a user";
+                responseResult.message = "Could not register a user";
                 responseResult.error = err;
                 res.status(422).send(responseResult) 
-            }else{
+            }else if(result == 'email_exist') {
+                responseResult.success = false;
+                responseResult.data = result;
+                responseResult.message = "User already exists with this email id.";
+                res.status(404).send(responseResult);
+            }
+            else{
                 responseResult.success = true;
                 responseResult.data = result;
                 responseResult.message = "User created successfully.";
@@ -48,7 +57,6 @@ class UserRegistration {
         
     }    
 
-    
     loginUser = (req, res) => {
         var responseResult = {};
         userService.loginUser(req.body, function(err, result){
@@ -63,13 +71,51 @@ class UserRegistration {
                     id: result._id,
                     emailUser: result.emailUser,
                 }
-                const obj = Utility.generateToken(payload);
-                responseResult.token = obj;
+                const token = Utility.generateToken(payload);
+                responseResult.token = token;
                 responseResult.message = "logged in successfully.";
                 res.status(201).send(responseResult);
             }
         });
     }
+
+    forgotPassword = (req, res) => {
+        var responseResult = {};
+        const payload = {
+            id: req.body._id,
+            emailUser: req.body.emailUser
+        }
+        const token = Utility.generateTokenForPasswordReset(payload);
+        userService.forgotPassword(req.body.emailUser, token, function(err, result){
+            if(err){
+                responseResult.success = false;
+                responseResult.message = "couldn't find email ";
+                responseResult.error = err;
+                res.status(422).send(responseResult) 
+            }else{
+                const data = {
+                    from: 'noreply@hello.com',
+                    to: req.body.emailUser,
+                    subject: 'Account Activation link',                 
+                };
+                mailgun.messages().send(data, function(err,body){
+                    if(err){
+                        responseResult.success = false;
+                        responseResult.message = "couldn't find email ";
+                        responseResult.error = err;
+                        res.status(422).send(responseResult)  
+                    }else{
+                        responseResult.success = true;
+                        responseResult.token = body;
+                        responseResult.message = "Email has been sent.Kindly follow the instructions.";
+                        res.status(201).send(responseResult);
+                    }
+
+                })
+                
+            }
+        })
+    }
 }
 
-module.exports = UserRegistration;
+module.exports = new UserRegistration();

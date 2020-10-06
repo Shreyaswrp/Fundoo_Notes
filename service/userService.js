@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
-const userModel = require('../app/models/userSchema.js');
+const userModel = require('../app/models/user.js');
+
 
 class UserService {
 
@@ -45,6 +46,18 @@ class UserService {
                     callback("password not correct");
                 }
             }
+        })
+    }
+
+    forgotPassword = (data, token, callback) => {
+        console.log('in service');
+        console.log(data);
+        userModel.forgotPassword(data, token, (err, result) => {
+            if(err) {
+                callback(err, null);
+            }else {
+                callback(null,result);
+            }   
         })
     }
     
