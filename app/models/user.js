@@ -13,7 +13,7 @@ const UserSchema = mongoose.Schema ({
         min: 3,
         required: true,
     },
-    emailUser: {
+    emailId: {
         type: String,
         trim: true,
         unique: true,
@@ -31,7 +31,7 @@ const UserSchema = mongoose.Schema ({
     }
 });
 
-const USER = mongoose.model('User', UserSchema);
+const userModel = mongoose.model('User', UserSchema);
 
 class UserModel {
 
@@ -39,17 +39,17 @@ class UserModel {
     * Create and Save a new User
     */
     registerUser = (data, callback) => {
-    
-        USER.findOne({ emailUser: data.emailUser }, (err, result) => {
+
+        userModel.findOne( { emailId: data.emailId}, (err, result) => {
             if(err){
                 callback(err, null);
             }else if(result != null){
                 callback(null, 'email_exist');
             }else{
-                const user = new USER({
+                const user = new userModel({
                 firstName: data.firstName,
                 lastName: data.lastName,
-                emailUser: data.emailUser,
+                emailId: data.emailId,
                 password: data.password
                 });
                 //save user in database    
@@ -59,31 +59,41 @@ class UserModel {
         })
     }
 
+    /**
+    * login a  User
+    */
     loginUser = (data,callback) => {
-        USER.findOne({ emailUser: data.emailUser }, (err,result) => {
+
+        if( data != null){
+        userModel.findOne( data.emailId, (err,result) => {
             if (err) {
                 callback(err,null);
-            }else if( data != null ){
-                callback(null,result);
             }else{
-                callback("user not found");
-            }     
-        });
+                callback(null,result);
+            }
+        });    
+        }else{
+            callback("user not found");
+        }     
     }
 
-    forgotPassword = (data, token, callback) => {
-        USER.findOne( { emailUser: data }, (err, user) => {
+    /**
+    * when forgot password send a token to reset
+    */
+    forgotPassword = (email, token, callback) => {
+        userModel.findOne( { emailUser: email }, (err, user) => {
             if ( err || !user) {
                 callback('user_not_exist',null);
-            }
-        USER.updateOne({resetLink: token}, (err, success) => {
-            if(err){
-                callback(err, null);
-            }else {
-                callback(null,success);
+            }else{
+            return user.updateOne({resetLink: token}, (err, success) => {
+                if(err){
+                    callback(err, null);
+                }else {
+                    callback(null,success);
+                }
+                })
             }
         })
-    })
     }
 }
 

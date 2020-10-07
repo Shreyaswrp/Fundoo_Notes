@@ -7,6 +7,7 @@ class UserService {
   /**
     * @params {object} data
     * @params {callback function} callback
+    * @description register a new user in the database
     */
     registerUser = (data, callback) => {
 
@@ -16,7 +17,7 @@ class UserService {
             var user = {
                 firstName: data.firstName,
                 lastName: data.lastName,
-                emailUser: data.emailUser,
+                emailId: data.emailId,
                 password: hash,
             };
         userModel.registerUser(user, function(err,result){
@@ -29,13 +30,11 @@ class UserService {
     }); 
     }
 
-    
-  /**
+    /**
     * @params {object} data
     * @params {callback function} callback
     */
-   
-    loginUser = (data, callback) => {
+   loginUser = (data, callback) => {
         userModel.loginUser(data, (err, result) => {
             if(err) {
                 callback(err, null);
@@ -49,9 +48,12 @@ class UserService {
         })
     }
 
+       
+  /**
+    * @params {object} data
+    * @params {callback function} callback
+    */
     forgotPassword = (data, token, callback) => {
-        console.log('in service');
-        console.log(data);
         userModel.forgotPassword(data, token, (err, result) => {
             if(err) {
                 callback(err, null);

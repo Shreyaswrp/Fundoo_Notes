@@ -16,23 +16,47 @@
 
 const userService = require('../service/userService.js');
 const Utility = require('../Utility/Utility.js');
-var api_key = 'XXXXXXXXXXXXXXXXXXXXXXX';
-var domain = 'www.mydomain.com';
-var mailgun = require('mailgun-js')({apiKey: api_key, domain: domain});
+const Joi = require("joi");
 
 class UserRegistration {
 
-    /**
-    * controller to past request to create user to service
+ /**
+   * Function to validate request
+   * @param {*} message
+   */
+   validateMessage = (message) => {
+    const schema = Joi.object({
+        firstName: Joi.string().min(3).required(),
+        lastName: Joi.string().min(3).required(),
+        password: Joi.string().min(8).required(),
+        emailId: Joi.string().required(),
+    });
+    return schema.validate(message);
+    }
+
+  /**
+    * controller to past request to register user to service
     * @param {httpRequest} req
     * @param {httpresponse} res
     */
     registerUser = (req, res) => {
+
         var responseResult = {};
+        //validate request
+        const { error } = this.validateMessage(req.body);
+        if(error) {
+            responseResult.success = false;
+            responseResult.message = "Could not register a user";
+            responseResult.error = error;
+            res.status(422).send(responseResult)
+        }
+
+        if(req.body != null || defined )
+        {
         const user = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
-            emailUser: req.body.emailUser,
+            emailId: req.body.emailId,
             password: req.body.password
         }
         userService.registerUser(user, function(err, result){
@@ -54,9 +78,18 @@ class UserRegistration {
                 res.status(201).send(responseResult);
             }
         });
-        
+        }else {
+            responseResult.success = false;
+            responseResult.message = "Invalid Request";
+            res.status(422).send(responseResult)  
+        }
     }    
 
+    /**
+    * controller to past request to login user to service
+    * @param {httpRequest} req
+    * @param {httpresponse} res
+    */
     loginUser = (req, res) => {
         var responseResult = {};
         userService.loginUser(req.body, function(err, result){
@@ -79,6 +112,11 @@ class UserRegistration {
         });
     }
 
+    /**
+    * controller to past request to forgot password to service
+    * @param {httpRequest} req
+    * @param {httpresponse} res
+    */
     forgotPassword = (req, res) => {
         var responseResult = {};
         const payload = {
@@ -89,30 +127,14 @@ class UserRegistration {
         userService.forgotPassword(req.body.emailUser, token, function(err, result){
             if(err){
                 responseResult.success = false;
-                responseResult.message = "couldn't find email ";
+                responseResult.message = "couldn't find email to send reset password link";
                 responseResult.error = err;
                 res.status(422).send(responseResult) 
             }else{
-                const data = {
-                    from: 'noreply@hello.com',
-                    to: req.body.emailUser,
-                    subject: 'Account Activation link',                 
-                };
-                mailgun.messages().send(data, function(err,body){
-                    if(err){
-                        responseResult.success = false;
-                        responseResult.message = "couldn't find email ";
-                        responseResult.error = err;
-                        res.status(422).send(responseResult)  
-                    }else{
-                        responseResult.success = true;
-                        responseResult.token = body;
-                        responseResult.message = "Email has been sent.Kindly follow the instructions.";
-                        res.status(201).send(responseResult);
-                    }
-
-                })
-                
+                responseResult.success = true;
+                responseResult.message = "password updated successfully";
+                responseResult.data = result;
+                res.status(201).send(responseResult) 
             }
         })
     }
