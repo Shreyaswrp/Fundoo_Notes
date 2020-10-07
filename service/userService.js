@@ -30,37 +30,58 @@ class UserService {
     }); 
     }
 
-    /**
-    * @params {object} data
-    * @params {callback function} callback
-    */
+ /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description login user after taking request from controller and pass it to model
+   */
    loginUser = (data, callback) => {
-        userModel.loginUser(data, (err, result) => {
+       userModel.loginUser(data, (err, result) => {
             if(err) {
                 callback(err, null);
-            }else {
-                if(bcrypt.compare(data.password, result.password)){
+            }else{ 
+                bcrypt.compare(data.password, result.password, (err, res) => {
+                    if (err) return callback(err);
+                    if (!res) return callback(new Error('invalid_password'));
                     callback(null, result);
-                }else{
-                    callback("password not correct");
-                }
+                })
             }
-        })
+        });
     }
 
-       
   /**
     * @params {object} data
     * @params {callback function} callback
+    * @description send reset link in case the password is forgotten
     */
-    forgotPassword = (data, token, callback) => {
-        userModel.forgotPassword(data, token, (err, result) => {
+    forgotPassword = (data, callback) => {
+        userModel.forgotPassword(data, (err, result) => {
             if(err) {
                 callback(err, null);
             }else {
                 callback(null,result);
             }   
         })
+    }
+
+    resetPassword = (data, callback) => {
+        let saltRounds = 10;
+        bcrypt.hash(data.password, saltRounds, (err, hash) => {
+            const obj = {
+                emailId: data.emailId,
+                password: hash
+            }
+            userModel.resetPassword(obj, (err, result) => {
+                if(err) {
+                    callback(err, null);
+                }else {
+                    
+                    callback(null,result);
+                }   
+            })
+        })
+
+        
     }
     
 }

@@ -17,6 +17,9 @@
 const userService = require('../service/userService.js');
 const Utility = require('../Utility/Utility.js');
 const Joi = require("joi");
+const nodemailer = require('nodemailer');
+const dotenv = require("dotenv");
+dotenv.config();
 
 class UserRegistration {
 
@@ -92,17 +95,19 @@ class UserRegistration {
     */
     loginUser = (req, res) => {
         var responseResult = {};
+        if(req.body != null || defined )
+        {
         userService.loginUser(req.body, function(err, result){
             if(err){
                 responseResult.success = false;
-                responseResult.message = "login failed";
+                responseResult.message = "Incorrect password !login failed.";
                 responseResult.error = err;
                 res.status(422).send(responseResult) 
-            }else{
+            }
+            else{
                 responseResult.success = true;
                 const payload = {
-                    id: result._id,
-                    emailUser: result.emailUser,
+                    emailId: result.emailId,
                 }
                 const token = Utility.generateToken(payload);
                 responseResult.token = token;
@@ -110,9 +115,14 @@ class UserRegistration {
                 res.status(201).send(responseResult);
             }
         });
+        }else {
+            responseResult.success = false;
+            responseResult.message = "Invalid Request";
+            res.status(422).send(responseResult)  
+        }
     }
 
-    /**
+  /**
     * controller to past request to forgot password to service
     * @param {httpRequest} req
     * @param {httpresponse} res
@@ -120,23 +130,76 @@ class UserRegistration {
     forgotPassword = (req, res) => {
         var responseResult = {};
         const payload = {
-            id: req.body._id,
-            emailUser: req.body.emailUser
+            emailId: req.body.emailId
         }
-        const token = Utility.generateTokenForPasswordReset(payload);
-        userService.forgotPassword(req.body.emailUser, token, function(err, result){
+        const token = Utility.generateToken(payload);
+        
+        userService.forgotPassword(payload, function(err, result){
             if(err){
                 responseResult.success = false;
                 responseResult.message = "couldn't find email to send reset password link";
                 responseResult.error = err;
                 res.status(422).send(responseResult) 
             }else{
-                responseResult.success = true;
-                responseResult.message = "password updated successfully";
-                responseResult.data = result;
-                res.status(201).send(responseResult) 
+                let mailTransporter = nodemailer.createTransport({ 
+                    service: 'gmail', 
+                    auth: { 
+                        user: process.env.EMAIL_ID, 
+                        pass: process.env.PASSWORD
+                    } 
+                }); 
+                let mailDetails = { 
+                    from: process.env.EMAIL_ID, 
+                    to: result.emailId, 
+                    subject: 'Email to reset password', 
+                    text: 'Go through the link to reset password \n' +token
+                }; 
+                mailTransporter.sendMail(mailDetails, function(err, data) { 
+                    if(err) { 
+                        responseResult.success = false;
+                        responseResult.message = "couldn't find email";
+                        responseResult.error = err;
+                        res.status(422).send(responseResult)
+                    } else { 
+                        responseResult.success = true;
+                        responseResult.message = "Email has been sent successfully";
+                        responseResult.data = data;
+                        res.status(201).send(responseResult) 
+                    } 
+                }); 
             }
         })
+    }
+
+    resetPassword = (req, res) => {
+        var responseResult = {};
+        let token = '';
+        try{
+         token = Utility.verifyToken(req.body.resetLink);
+        }catch(err){
+            responseResult.success = false;
+                    responseResult.message = "Authentication error";
+                    responseResult.error = err;
+                    res.status(401).send(responseResult) 
+        }
+        if(token.data.emailId == req.body.emailId){
+            userService.resetPassword(req.body, (err,result) => {
+                if(err){
+                    responseResult.success = false;
+                    responseResult.message = "couldn't update password";
+                    responseResult.error = err;
+                    res.status(422).send(responseResult)  
+                }else { 
+                    responseResult.success = true;
+                    responseResult.message = "Password updated successfully";
+                    res.status(201).send(responseResult) 
+                }
+            })
+        }else {
+            responseResult.success = false;
+            responseResult.message = "Authentication error";
+            res.status(422).send(responseResult)
+        }
     }
 }
 

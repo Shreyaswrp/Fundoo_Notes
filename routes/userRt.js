@@ -8,7 +8,11 @@ router.post('/register', user.registerUser);
 //route to register controller with path /login
 router.post('/login', user.loginUser);
 
-router.put('/forgot-password', user.forgotPassword);
+//route to register controller with path /forgot-password
+router.post('/forgot-password', user.forgotPassword);
+
+//route to register controller with path /reset-password
+router.put('/reset-password', user.resetPassword);
 
 module.exports = router;
 

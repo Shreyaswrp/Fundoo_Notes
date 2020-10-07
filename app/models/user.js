@@ -35,8 +35,10 @@ const userModel = mongoose.model('User', UserSchema);
 
 class UserModel {
 
-  /**
-    * Create and Save a new User
+    /**
+    * @params {object} data
+    * @params {callback function} callback
+    * @description register a new user in the database
     */
     registerUser = (data, callback) => {
 
@@ -59,42 +61,54 @@ class UserModel {
         })
     }
 
-    /**
-    * login a  User
-    */
+ /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description login a user 
+   */
     loginUser = (data,callback) => {
-
-        if( data != null){
-        userModel.findOne( data.emailId, (err,result) => {
+        userModel.findOne( {emailId: data.emailId}, (err,result) => {
             if (err) {
                 callback(err,null);
             }else{
                 callback(null,result);
             }
         });    
-        }else{
-            callback("user not found");
-        }     
-    }
-
-    /**
+    }  
+        
+  /**
     * when forgot password send a token to reset
     */
-    forgotPassword = (email, token, callback) => {
-        userModel.findOne( { emailUser: email }, (err, user) => {
+    forgotPassword = (data, callback) => {
+        userModel.findOne( { emailId: data.emailId }, (err, user) => {
             if ( err || !user) {
                 callback('user_not_exist',null);
             }else{
-            return user.updateOne({resetLink: token}, (err, success) => {
-                if(err){
-                    callback(err, null);
-                }else {
-                    callback(null,success);
-                }
-                })
+                callback(null, user);
             }
         })
     }
+
+    resetPassword = (data, callback) => {
+        userModel.findOne( {emailId: data.emailId}, (err, result) => {
+            if ( err || !result) {
+                callback('invalid_reset_link',null);
+            }else{
+                userModel.updateOne({emailId: data.emailId},{password: data.password},(err, docs) => { 
+                    if (err){ 
+                        callback(err, null);
+                    } 
+                    else{ 
+                        callback(null, docs);
+                    } 
+                }); 
+            } 
+        })
+    }
+
 }
+
+    
+
 
 module.exports = new UserModel();
