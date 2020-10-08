@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const userModel = require('../app/models/user.js');
 
-
 class UserService {
 
   /**
@@ -64,6 +63,11 @@ class UserService {
         })
     }
 
+  /**
+    * @params {object} data
+    * @params {callback function} callback
+    * @description update the password by the reset link provided
+    */
     resetPassword = (data, callback) => {
         let saltRounds = 10;
         bcrypt.hash(data.password, saltRounds, (err, hash) => {
@@ -75,15 +79,11 @@ class UserService {
                 if(err) {
                     callback(err, null);
                 }else {
-                    
                     callback(null,result);
                 }   
             })
         })
-
-        
     }
-    
 }
 
 module.exports = new UserService();
