@@ -44,7 +44,7 @@ class UserRegistration {
     */
     registerUser = (req, res) => {
         var responseResult = {};
-    
+
         if(req.body != null || req.body != undefined )
         {
         //validate request
@@ -189,15 +189,15 @@ class UserRegistration {
     */
     resetPassword = (req, res) => {
         var responseResult = {};
-        console.log(req.body.params);
-        if(req.body != null || req.body != undefined ){
+    
+        if(req.headers != null || req.headers != undefined ){
         let token = '';
         let obj = '';
         try{
-         token = Utility.verifyToken(req.body.token);
+         token = Utility.verifyToken(req.headers.token);
             obj = {
              emailId: token.data.emailId,
-             password: req.body.password
+             password: req.headers.password
             }
         }catch(err){
             responseResult.success = false;
@@ -207,20 +207,20 @@ class UserRegistration {
         }
         userService.resetPassword(obj, (err,result) => {
             if(err){
-                    responseResult.success = false;
-                    responseResult.message = "couldn't update password";
-                    responseResult.error = err;
-                    res.status(422).send(responseResult)  
+                responseResult.success = false;
+                responseResult.message = "couldn't update password";
+                responseResult.error = err;
+                res.status(422).send(responseResult)  
             }else { 
-                    responseResult.success = true;
-                    responseResult.message = "Password updated successfully";
-                    res.status(201).send(responseResult) 
+                responseResult.success = true;
+                responseResult.message = "Password updated successfully";
+                res.status(201).send(responseResult) 
             }
             })
         }else {
-            responseResult.success = false;
-            responseResult.message = "Authentication error! Request body not found";
-            res.status(422).send(responseResult)
+                responseResult.success = false;
+                responseResult.message = "Authentication error! Request body not found";
+                res.status(422).send(responseResult)
         }
     }
 }
