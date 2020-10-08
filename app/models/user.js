@@ -16,6 +16,7 @@ const UserSchema = mongoose.Schema ({
     emailId: {
         type: String,
         trim: true,
+        min: 3,
         unique: true,
         lowercase: true,
         required: true,
@@ -68,8 +69,8 @@ class UserModel {
    */
     loginUser = (data,callback) => {
         userModel.findOne( {emailId: data.emailId}, (err,result) => {
-            if (err) {
-                callback(err,null);
+            if ( err || !result) {
+                callback('invalid_emailid',null);
             }else{
                 callback(null,result);
             }
