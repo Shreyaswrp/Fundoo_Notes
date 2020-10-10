@@ -17,9 +17,8 @@
 const userService = require('../service/userService.js');
 const Utility = require('../Utility/Utility.js');
 const Joi = require("joi");
-const nodemailer = require('nodemailer');
-const dotenv = require("dotenv");
-dotenv.config();
+const lib = require('../lib/sendMail.js');
+
 
 class UserRegistration {
 
@@ -39,14 +38,11 @@ class UserRegistration {
 
     /**
     * controller to past request to register user to service
-    * @param {httpRequest} req
-    * @param {httpresponse} res
+    * @params {object} data
     */
     registerUser = (req, res) => {
         var responseResult = {};
-
-        if(req.body != null || req.body != undefined )
-        {
+        if(req.body != null || req.body != undefined ){
         //validate request
         const { error } = this.validateUser(req.body);
         if(error) {
@@ -55,7 +51,6 @@ class UserRegistration {
             responseResult.error = error;
             res.status(422).send(responseResult)
         }
-        
         const user = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
@@ -68,7 +63,7 @@ class UserRegistration {
                 responseResult.message = "Could not register a user";
                 responseResult.error = err;
                 res.status(422).send(responseResult) 
-            }else if(result == 'email_exist') {
+            }else if(result == 'user_exists') {
                 responseResult.success = false;
                 responseResult.data = result;
                 responseResult.message = "User already exists with this email id.";
@@ -90,31 +85,26 @@ class UserRegistration {
 
     /**
     * controller to past request to login user to service
-    * @param {httpRequest} req
-    * @param {httpresponse} res
+    * @param {object} data
     */
     loginUser = (req, res) => {
         var responseResult = {};
         if(req.body != null || req.body != undefined )
         {
-        userService.loginUser(req.body, function(err, result){
-            if(err){
-                if(err == "invalid_emailid"){
-                    responseResult.success = false;
-                    responseResult.message = "Invalid email id.";
-                    responseResult.error = err;
-                    res.status(422).send(responseResult) 
-                }
+            const payload = {
+                emailId: req.body.emailId,
+                password: req.body.password
+            }
+        userService.loginUser(payload, function(err, result){
+            if(err || result == null){
                 responseResult.success = false;
-                responseResult.message = "Incorrect password !login failed.";
+                responseResult.message = "Incorrect password or email id ! login failed.";
                 responseResult.error = err;
                 res.status(422).send(responseResult) 
-            }else{
+            }
+            else{
                 responseResult.success = true;
-                const payload = {
-                    emailId: result.emailId,
-                }
-                const token = Utility.generateToken(payload);
+                const token = Utility.generateToken(result.emailId);
                 responseResult.token = token;
                 responseResult.message = "logged in successfully.";
                 res.status(201).send(responseResult);
@@ -129,12 +119,10 @@ class UserRegistration {
 
   /**
     * controller to past request to forgot password to service
-    * @param {httpRequest} req
-    * @param {httpresponse} res
+    * @param {object} data
     */
-    forgotPassword = (req, res) => {
+   forgotPassword = (req, res) => {
         var responseResult = {};
-        
         if(req.body != null || req.body != undefined ){
             const payload = {
                 emailId: req.body.emailId
@@ -147,32 +135,10 @@ class UserRegistration {
                 responseResult.error = err;
                 res.status(422).send(responseResult) 
             }else{
-                let mailTransporter = nodemailer.createTransport({ 
-                    service: 'gmail', 
-                    auth: { 
-                        user: process.env.EMAIL_ID, 
-                        pass: process.env.PASSWORD
-                    } 
-                }); 
-                let mailDetails = { 
-                    from: process.env.EMAIL_ID, 
-                    to: result.emailId, 
-                    subject: 'Email to reset password', 
-                    html: `<h2>Please click on given link to reset your password</h2>
-                    <span>${process.env.CLIENT_URL}/forgot-password/${token}</span>`
-                }; 
-                mailTransporter.sendMail(mailDetails, function(err, data) { 
-                    if(err) { 
-                        responseResult.success = false;
-                        responseResult.message = "couldn't find email";
-                        responseResult.error = err;
-                        res.status(422).send(responseResult)
-                    } else { 
-                        responseResult.success = true;
-                        responseResult.message = "A reset password link has been sent to your email successfully";
-                        res.status(201).send(responseResult) 
-                    } 
-                }); 
+                lib.sendEmail(token, result.emailId);
+                responseResult.success = true;
+                responseResult.message = "A reset password link has been sent to your email successfully";
+                res.status(201).send(responseResult) 
             }
         })
         }else{
@@ -184,12 +150,10 @@ class UserRegistration {
 
   /**
     * controller to past request to forgot password to service
-    * @param {httpRequest} req
-    * @param {httpresponse} res
+    * @param {object} data
     */
     resetPassword = (req, res) => {
         var responseResult = {};
-    
         if(req.headers != null || req.headers != undefined ){
         let token = '';
         let obj = '';
