@@ -78,15 +78,13 @@ class UserService {
             password: Utility.hashPassword(data),
         };
         userModel.updateUser(obj, (err, result) => {
-                if(err) {
-                    callback(err, null);
-                }else {
-                    callback(null,result);
-                }   
+            if(err) {
+                callback(err, null);
+            }else {
+                callback(null,result);
+            }   
         })
-    
     }
-    
 }
 
 module.exports = new UserService();

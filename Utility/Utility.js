@@ -2,7 +2,6 @@ const bcrypt = require('bcrypt');
 const dotenv = require("dotenv");
 dotenv.config();
 const jwt = require('jsonwebtoken');
-const { callbackPromise } = require('nodemailer/lib/shared');
 
 exports.generateToken = (data) => { 
     const token = jwt.sign({data}, process.env.TOKEN_SECRET, {expiresIn: '24h'});

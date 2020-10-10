@@ -19,7 +19,6 @@ const Utility = require('../Utility/Utility.js');
 const Joi = require("joi");
 const lib = require('../lib/sendMail.js');
 
-
 class UserRegistration {
 
  /**
@@ -129,7 +128,7 @@ class UserRegistration {
             }
             const token = Utility.generateToken(payload);
         userService.forgotPassword(payload, function(err, result){
-            if(err){
+            if(err || result == null){
                 responseResult.success = false;
                 responseResult.message = "couldn't find email to send reset password link";
                 responseResult.error = err;
