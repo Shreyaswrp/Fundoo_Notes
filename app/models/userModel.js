@@ -27,7 +27,7 @@ const UserSchema = mongoose.Schema ({
         required: true,
     },
     token: {
-        data: String,
+        type: String,
         default: '',
     },
     },{
@@ -44,15 +44,8 @@ class UserModel {
     * @description create a new user in the database
     */
     createUser = (data, callback) => {
-        
-        const user = new userModel({firstName: data.firstName,lastName: data.lastName,emailId: data.emailId,password: data.password});   
-        user.save((err, result) => {
-            if(err){
-                callback(err, null);
-            }else{
-                callback(null, result);
-            }
-        });
+        const userData = new userModel( {firstName: data.firstName, lastName: data.lastName, emailId: data.emailId, password: data.password});   
+            return userData.save(callback);
     }
 
   /**
@@ -61,13 +54,7 @@ class UserModel {
     * @description find a user in the database
     */
     findUser = (data,callback) => {
-        userModel.findOne( {emailId: data.emailId}, (err,result) => {
-            if ( err ) {
-                callback(err,null);
-            }else{
-                callback(null, result);
-            }
-        });    
+        return userModel.findOne( {emailId: data.emailId}, callback);    
     }  
     
   /**
@@ -76,14 +63,7 @@ class UserModel {
     * @description update user's details in the database
     */
     updateUser = (data, callback) => {
-        userModel.updateOne({emailId: data.emailId},{password: data.password},(err, docs) => { 
-            if (err){ 
-                callback(err, null);
-            } 
-            else{ 
-                callback(null, docs);
-            } 
-        }); 
+        return userModel.updateOne({emailId: data.emailId},{password: data.password}, callback); 
     }
 }
 

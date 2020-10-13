@@ -3,13 +3,36 @@ const mongoose = require('mongoose');
 const NoteSchema = mongoose.Schema ({
     title: {
         type: String,
-        required: true,
-        min: 3
     },
     description: {
         type: String,
-        required: true,
-        min: 3
+    },
+    reminder: {
+        type: Date,
+    },
+    collaborator: {
+        type: String,
+        default: '',
+    },
+    colour: {
+        type: String,
+        default: '',
+    },
+    image: {
+        type: String,
+        default: '',
+    },label: {
+        type: String,
+        default: '',
+    },drawing: {
+        type: String,
+        default: '',
+    },checkbox: {
+        type: Boolean,
+        default: '',
+    },pin: {
+        type: Boolean,
+        default: '',
     },
     },
     {
@@ -18,21 +41,21 @@ const NoteSchema = mongoose.Schema ({
 
 const Note = mongoose.model('Note', NoteSchema);
 
-class NoteModel{
+class NoteModel {
 
 /**
  * Create and Save a new Note
  */
-createNote = (data, callback) => {
-    const note = new Note({title: data.title, description: data.description});
+    createNote = (data, callback) => {
+        const note = new Note({title: data.title, description: data.description});
     note.save((err, result) => {
-        if(err){
+        if(err) {
             callback(err, null);
         }else{
             callback(null, result);
         }
     });
-}
+    }
 
 /**
  * Retrieve and return all notes from the database.
