@@ -1,5 +1,5 @@
-const Utility = require('../Utility/Utility.js');
-const userModel = require('../app/models/userSchema.js');
+const utility = require('../utility/utility.js');
+const userModel = require('../app/models/userModel.js');
 
 class UserService {
 
@@ -9,27 +9,21 @@ class UserService {
     * @description register a new user in the database
     */
     registerUser = (data, callback) => {
-       var user = {
+       var userDetails = {
             firstName: data.firstName,
             lastName: data.lastName,
             emailId: data.emailId,
-            password: Utility.hashPassword(data),
+            password: utility.hashPassword(data),
         };
-        userModel.findUser(user, (err, result) => {
+        userModel.findUser(userDetails, (err, result) => {
             if (err) {
-                callback(err,null);
+                return callback(err,null);
             }else if(result != null){
-                callback(null, 'user_exists');
+                return callback(null, 'user_exists');
             }else{
-                userModel.createUser(user, function(err,data){
-                    if (err) {
-                        callback(err,null);
-                    } else {
-                        callback(null,data);
-                    }
-                });
-            } 
-        });
+                return userModel.createUser(userDetails, callback); 
+            }
+        });        
     }
 
  /**
@@ -38,15 +32,15 @@ class UserService {
    * @description let a user login by providing correct id and password 
    */
    loginUser = (data, callback) => {
-       userModel.findUser(data, (err, result) => {
+        userModel.findUser(data, (err, result) => {
             if(err || result == null) {
-                callback('Invalid email', null);
-            }else{ 
-                const res = Utility.comparePasswords(data.password,result.password)
-                if(res){
-                    callback(null, result);
-                }else{
-                    callback('Incorrect_password', null);
+                return callback(err, null);
+            }else { 
+                const res = utility.comparePasswords(data.password,result.password)
+                if(res) {
+                    return callback(null, result);
+                }else {
+                    return callback('Incorrect_password', null);
                 }
             }
         });
@@ -58,13 +52,7 @@ class UserService {
     * @description send reset link in case the password is forgotten
     */
     forgotPassword = (data, callback) => {
-        userModel.findUser(data, (err, result) => {
-            if(err) {
-                callback(err, null);
-            }else {
-                callback(null,result);
-            }   
-        })
+        return userModel.findUser(data, callback);
     }
 
   /**
@@ -75,15 +63,9 @@ class UserService {
     resetPassword = (data, callback) => {
         const obj = {
             emailId: data.emailId,
-            password: Utility.hashPassword(data),
+            password: utility.hashPassword(data),
         };
-        userModel.updateUser(obj, (err, result) => {
-            if(err) {
-                callback(err, null);
-            }else {
-                callback(null,result);
-            }   
-        })
+            return userModel.updateUser(obj, callback);
     }
 }
 
