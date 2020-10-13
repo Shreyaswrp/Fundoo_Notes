@@ -18,12 +18,12 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const routes = require('./routes/userRt.js');
-const noteRoutes = require('./routes/noteRt.js');
+const routes = require('./routes/routes');
+const logger = require('./config/logger');
+require('./config/databaseConfig');
+require('dotenv/config');
 
-/**
- * create express app
- */
+// create express app
 const app = express();
 
 // parse requests of content-type - application/x-www-form-urlencoded
@@ -34,21 +34,13 @@ app.use(bodyParser.json())
 
 app.use(routes);
 
-app.use(noteRoutes);
-
 //Define a simple route to display Message at the homepage
 app.get('/', (req, res) => {
         res.json("Welcome to Fundoo Notes application.");
 });
 
-require('./config/database.config.js');
-
-require('dotenv/config');
-
-/**
- * listen for requests
- */
+// listen for requests
 const PORT = process.env.PORT;
 app.listen( PORT, () => {
-    console.log("Server is listening on port"+" " +PORT);
+    logger.error( "Server is listening on port"+" " +PORT);
 });
