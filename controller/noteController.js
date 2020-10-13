@@ -38,12 +38,13 @@ validateNote = (note) => {
 createNote = (req, res) => {
 
     var responseResult = {};
+
     // Validate request
     const { error } = this.validateNote(req.body);
     if (error) {
         responseResult.success = false;
         responseResult.message = "Could not create a note";
-        responseResult.error = errors;
+        responseResult.error = error;
         res.status(422).send(responseResult)
     }else{
         const note = {
