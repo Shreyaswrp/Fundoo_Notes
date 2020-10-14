@@ -26,7 +26,7 @@ class UserRegistration {
    */
   registerUser = (req, res) => {
     var responseResult = {};
-    logger.info("request body" + req.body);
+    logger.info("request body" + JSON.stringify(req.body));
 
     if (req.body != null || req.body != undefined) {
       //validate request
@@ -75,7 +75,7 @@ class UserRegistration {
    */
   loginUser = (req, res) => {
     var responseResult = {};
-    logger.info("request body" + req.body);
+    logger.info("request body" + JSON.stringify(req.body));
 
     if (req.body != null || req.body != undefined) {
       const payload = {
@@ -111,7 +111,7 @@ class UserRegistration {
    */
   forgotPassword = (req, res) => {
     var responseResult = {};
-    logger.info("request body" + req.body);
+    logger.info("request body" + JSON.stringify(req.body));
     if (req.body != null || req.body != undefined) {
       const payload = {
         emailId: req.body.emailId,
@@ -146,7 +146,7 @@ class UserRegistration {
    */
   resetPassword = (req, res) => {
     var responseResult = {};
-    logger.info("request body" + req.body);
+    logger.info("request body" + JSON.stringify(req.body));
     if (req.headers != null || req.headers != undefined) {
       let token = "";
       let obj = "";
