@@ -8,7 +8,7 @@ const NoteSchema = mongoose.Schema ({
         type: String,
     },
     reminder: {
-        type: Date,
+        type: String,
     },
     collaborator: {
         type: String,
@@ -21,18 +21,22 @@ const NoteSchema = mongoose.Schema ({
     image: {
         type: String,
         default: '',
-    },label: {
+    },
+    addLabel: {
         type: String,
         default: '',
-    },drawing: {
+    },
+    deleteNote: {
         type: String,
         default: '',
-    },checkbox: {
+    },
+    isPinned: {
         type: Boolean,
-        default: '',
-    },pin: {
+        default: false,
+    },
+    isArchived: {
         type: Boolean,
-        default: '',
+        default: false,
     },
     },
     {
@@ -43,59 +47,57 @@ const Note = mongoose.model('Note', NoteSchema);
 
 class NoteModel {
 
-/**
- * Create and Save a new Note
- */
+    /**
+    * @params {object} data
+    * @params {callback function} callback
+    * @description create a new note in the database
+    */
     createNote = (data, callback) => {
-        const note = new Note({title: data.title, description: data.description});
-    note.save((err, result) => {
-        if(err) {
-            callback(err, null);
-        }else{
-            callback(null, result);
-        }
-    });
+        const noteData = new Note({title: data.title, description: data.description});
+            return noteData.save(callback);
     }
 
-/**
- * Retrieve and return all notes from the database.
- */
-findAllNotes = (data, callback) => {
-    Note.find(data, function(err,result) {
-        if(err)return callback(err,null);
-        return callback(null,result);
-    })
-}
+    /**
+    * @params {object} data
+    * @params {callback function} callback
+    * @description Retrieve and return all notes from the database.
+    */
+    findAllNotes = (data, callback) => {
+        return Note.find(data, callback)
+    }
 
-/**
- * Find a single note with a noteId
- */
-findOneNote = (noteId, callback) => {
-    Note.findById(noteId, function(err,data){
-        if(err)return callback(err,null);
-        return callback(null,data);
-    })
-}
+    /**
+    * @params {object} data
+    * @params {callback function} callback
+    * @description Find a single note with noteId
+    */
+    findOneNote = (noteId, callback) => {
+        return Note.findById(noteId, callback)
+    }
 
-/**
- * Update a note identified by the noteId in the request
- */
-updateNote = (id, data, callback) => {
-    Note.findByIdAndUpdate(id, data,  { new: true }, function (err, post){
-    if (err) return next(err);
-    callback(null, post);
-    });    
-}
+    /**
+    * @params {object} data
+    * @params {callback function} callback
+    * @description Update a note identified by the noteId in the request
+    */
+    updateNote = (id, data, callback) => {
+        return Note.findByIdAndUpdate(id, data,  { new: true }, callback)    
+    }
 
-/**
- * Delete a note with the specified noteId in the request
- */
-deleteNote = (noteId,callback) => {
-    Note.findByIdAndDelete(noteId, (err, data) => {
-    if (err || data == null) callback(err, null);
-    callback(null,"Note_deleted");  
-    })
-}
+    /**
+    * @params {object} data
+    * @params {callback function} callback
+    * @description Delete a note with the specified noteId in the request
+    */
+    deleteNote = (noteId,callback) => {
+        Note.findByIdAndDelete(noteId, (err, data) => {
+            if (err || data == null) {
+                return callback(err, null);
+            }else {    
+                return callback(null,"Note_deleted");
+            }  
+        })
+    }
 }
 
 module.exports = new NoteModel();
