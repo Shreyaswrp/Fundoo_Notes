@@ -7,13 +7,7 @@ class NoteService{
      * @description create a note
      */
     createNote = (data,callback) => {
-        Note.createNote(data,function(err, result) {
-            if (err) {
-                callback(err,null);
-            } else {
-                callback(null,result);
-            }
-        })
+       return Note.createNote(data, callback);
     }
     
     /**
@@ -22,13 +16,7 @@ class NoteService{
      * @description find all notes
      */
     findAllNotes = (data,callback) => {
-        Note.findAllNotes(data,function(err, result) {
-            if (err) {
-                callback(err,null);
-            } else {
-                callback(null, result);
-            }
-        })
+        return Note.findAllNotes(data, callback)
     }
     
     /**
@@ -37,13 +25,7 @@ class NoteService{
      * @description find a note
      */
     findOneNote = (data, callback) => {
-        Note.findOneNote(data, (err, result) => {
-            if (err) {
-                callback(err,null)
-            } else {
-                callback(null, result);
-            }
-        })
+        return Note.findOneNote(data, callback)
     }
     
     /**
@@ -52,13 +34,7 @@ class NoteService{
      * @description update a note
      */
     updateNote = (id, data, callback) => {
-        Note.updateNote(id, data, (err, result) => {
-            if (err) {
-                callback(err,null);
-            } else {
-                callback(null, result);
-            }
-        })
+        return Note.updateNote(id, data, callback);
     }
     
     /**
@@ -67,13 +43,7 @@ class NoteService{
      * @description delete a note
      */
     deleteNote = (data, callback) => {
-        Note.deleteNote(data, (err, result) => {
-            if (err) {
-                callback(err,null);
-            } else {
-                callback(null, result);
-            }
-        })
+        return Note.deleteNote(data, callback)
     }
  }
     
