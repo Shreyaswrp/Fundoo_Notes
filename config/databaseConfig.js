@@ -1,19 +1,16 @@
-/**
- * Configuring the database
- */
+const logger = require('./logger');
+// Configuring the database
 require('dotenv/config');
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
-/**
- * Connecting to the database
- */
+// Connecting to the database
 const DB_CONFIG = mongoose.connect(process.env.DB_CONNECTION, {
     useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, 'useCreateIndex': true
 }).then(() => {
-    console.log("Successfully connected to the database");    
+    logger.info("Successfully connected to the database");    
 }).catch(err => {
-    console.log('Could not connect to the database. Exiting now...', err);
+    logger.error('Could not connect to the database. Exiting now...', err);
     process.exit();
 });
 
