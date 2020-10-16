@@ -1,11 +1,15 @@
 const mongoose = require("mongoose");
 
-const NoteSchema = mongoose.Schema(
-  {
+const NoteSchema = mongoose.Schema({
     title: {
       type: String,
+      required: true,
+      min: 3,
     },
     description: {
+      type: String,
+    },
+    userId: {
       type: String,
     },
     reminder: {
@@ -13,7 +17,6 @@ const NoteSchema = mongoose.Schema(
     },
     colour: {
       type: String,
-      default: "Green",
     },
     image: {
       type: String,
@@ -23,6 +26,10 @@ const NoteSchema = mongoose.Schema(
       default: false,
     },
     isArchived: {
+      type: Boolean,
+      default: false,
+    },
+    isDeleted: {
       type: Boolean,
       default: false,
     },
@@ -44,6 +51,13 @@ class NoteModel {
     const noteData = new Note({
       title: data.title,
       description: data.description,
+      userId: data.userId,
+      reminder: data.reminder,
+      colour: data.colour,
+      image: data.image,
+      isPinned: data.isPinned,
+      isArchived: data.isArchived,
+      isDeleted: data.isArchived,
     });
     return noteData.save(callback);
   };

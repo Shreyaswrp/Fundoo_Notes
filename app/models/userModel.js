@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
-const UserSchema = mongoose.Schema(
-  {
+const UserSchema = mongoose.Schema({
     firstName: {
       type: String,
       trim: true,
@@ -29,7 +28,6 @@ const UserSchema = mongoose.Schema(
     },
     token: {
       type: String,
-      default: "",
     },
   },
   {
@@ -64,17 +62,22 @@ class UserModel {
     return userModel.findOne({ emailId: data.emailId }, callback);
   };
 
+   /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description find a user in the database
+   */
+  findUserById = (data, callback) => {
+    return userModel.findById({ _id: data }, callback);
+  };
+
   /**
    * @params {object} data
    * @params {callback function} callback
    * @description update user's details in the database
    */
   updateUser = (data, callback) => {
-    return userModel.updateOne(
-      { emailId: data.emailId },
-      { password: data.password },
-      callback
-    );
+    return userModel.updateOne({ emailId: data.emailId }, { password: data.password }, callback);
   };
 }
 
