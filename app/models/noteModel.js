@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
 const NoteSchema = mongoose.Schema({
     title: {
@@ -10,7 +11,9 @@ const NoteSchema = mongoose.Schema({
       type: String,
     },
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'users',
+      required: true,
     },
     reminder: {
       type: String,
@@ -36,6 +39,7 @@ const NoteSchema = mongoose.Schema({
   },
   {
     timestamps: true,
+    strict: true, 
   }
 );
 
