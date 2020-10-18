@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
-const UserSchema = mongoose.Schema({
+const UserSchema = mongoose.Schema(
+  {
     firstName: {
       type: String,
       trim: true,
@@ -24,6 +25,11 @@ const UserSchema = mongoose.Schema({
     password: {
       type: String,
       min: 8,
+      required: true,
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
       required: true,
     },
     token: {
@@ -62,7 +68,7 @@ class UserModel {
     return userModel.findOne({ emailId: data.emailId }, callback);
   };
 
-   /**
+  /**
    * @params {object} data
    * @params {callback function} callback
    * @description find a user in the database
@@ -74,10 +80,27 @@ class UserModel {
   /**
    * @params {object} data
    * @params {callback function} callback
-   * @description update user's details in the database
+   * @description update user's password in the database
    */
   updateUser = (data, callback) => {
-    return userModel.updateOne({ emailId: data.emailId }, { password: data.password }, callback);
+    return userModel.updateOne(
+      { emailId: data.emailId },
+      { password: data.password },
+      callback
+    );
+  };
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description update user's email verification field in the database
+   */
+  updateUserEmailVerification = (data, callback) => {
+    return userModel.updateOne(
+      { emailId: data.emailId },
+      { isEmailVerified: data.isEmailVerified },
+      callback
+    );
   };
 }
 
