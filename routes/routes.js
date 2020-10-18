@@ -2,10 +2,13 @@ const express = require('express');
 const router = express.Router();
 const user = require('../controller/userController.js');
 const note = require('../controller/noteController.js');
-const auth = require('../lib/authorizeUser.js');
+const auth = require('../middleware/authorizeUser.js');
 
 //register a new User
 router.post('/register', user.registerUser);
+
+//route to verify email address
+router.post('/verify-email', user.verifyEmailAddress);
 
 //route to register controller with path /login
 router.post('/login', user.loginUser);
