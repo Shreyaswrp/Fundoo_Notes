@@ -66,6 +66,19 @@ class UserService {
     };
     return userModel.updateUser(obj, callback);
   };
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description verfify email address of a user
+   */
+  verifyEmail = (data, callback) => {
+    const obj = {
+      emailId: data.emailId,
+      isEmailVerified: data.isEmailVerified,
+    };
+    return userModel.updateUserEmailVerification(obj, callback);
+  };
 }
 
 module.exports = new UserService();
