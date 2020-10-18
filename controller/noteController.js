@@ -16,6 +16,11 @@
 
 const noteService = require("../service/noteService");
 const logger = require("../config/logger");
+const utility = require("../utility/utility");
+const redis = require("redis");
+
+const port_redis = process.env.REDIS_PORT;
+const redis_client = redis.createClient(port_redis);
 
 class Note {
   /**
@@ -30,11 +35,27 @@ class Note {
       responseResult.message = "Note content cannot be null or undefined";
       res.status(400).send(responseResult);
     }
-    logger.info("request body" + JSON.stringify(req.body));
+    //validate note content
+    const { error } = utility.validateNote(req.body);
+    if (error) {
+      logger.error("error validate" + error);
+      responseResult.success = false;
+      responseResult.message = "Could not create a note";
+      res.status(422).send(responseResult);
+    }
+    const decodedValue = utility.verifyToken(req.headers.token);
     const noteDetails = {
       title: req.body.title,
       description: req.body.description,
+      userId: decodedValue.data,
+      reminder: req.body.reminder,
+      colour: req.body.colour,
+      image: req.body.image,
+      isPinned: req.body.isPinned,
+      isArchived: req.body.isArchived,
+      isDeleted: req.body.isArchived,
     };
+    logger.info("request body" + JSON.stringify(req.body));
     noteService.createNote(noteDetails, (err, data) => {
       if (err) {
         logger.error("error" + err);
@@ -92,6 +113,8 @@ class Note {
         responseResult.message = "Could not find a note with the given id";
         res.status(422).send(responseResult);
       } else {
+        const noteData = data;
+        redis_client.setex(req.params.noteId, 3600, JSON.stringify(noteData));
         logger.info("response data" + data);
         responseResult.success = true;
         responseResult.data = data;
@@ -125,6 +148,8 @@ class Note {
         responseResult.message = "Could not update note with the given id";
         res.status(422).send(responseResult);
       } else {
+        const noteData = data;
+        redis_client.setex(req.params.noteId, 3600, JSON.stringify(noteData));
         logger.info("response data" + data);
         responseResult.success = true;
         responseResult.data = data;
@@ -152,6 +177,8 @@ class Note {
         responseResult.message = "Could not delete note with the given id";
         res.status(422).send(responseResult);
       } else {
+        const noteData = data;
+        redis_client.setex(req.params.noteId, 3600, JSON.stringify(noteData));
         logger.info("response data" + data);
         responseResult.success = true;
         responseResult.data = data;
