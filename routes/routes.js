@@ -25,9 +25,6 @@ router.post('/create-note', auth.authorizeUser, note.createNote);
 //route to find all notes
 router.get('/find-notes', auth.authorizeUser, note.findAllNotes);
 
-//route to find a note
-router.get('/find-note/:noteId', auth.authorizeUser, note.findOneNote);
-
 //route to update a note
 router.put('/update-note/:noteId', auth.authorizeUser, note.updateNote);
 
