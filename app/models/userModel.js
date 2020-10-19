@@ -32,12 +32,10 @@ const UserSchema = mongoose.Schema(
       default: false,
       required: true,
     },
-    token: {
-      type: String,
-    },
   },
   {
     timestamps: true,
+    strict: true,
   }
 );
 
@@ -66,15 +64,6 @@ class UserModel {
    */
   findUser = (data, callback) => {
     return userModel.findOne({ emailId: data.emailId }, callback);
-  };
-
-  /**
-   * @params {object} data
-   * @params {callback function} callback
-   * @description find a user in the database
-   */
-  findUserById = (data, callback) => {
-    return userModel.findById({ _id: data }, callback);
   };
 
   /**

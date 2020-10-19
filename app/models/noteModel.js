@@ -71,17 +71,8 @@ class NoteModel {
    * @params {callback function} callback
    * @description Retrieve and return all notes from the database.
    */
-  findAllNotes = (data, callback) => {
-    return Note.find(data, callback);
-  };
-
-  /**
-   * @params {object} data
-   * @params {callback function} callback
-   * @description Find a single note with noteId
-   */
-  findOneNote = (noteId, callback) => {
-    return Note.findById(noteId, callback);
+  findAllNotes = (callback) => {
+    return Note.find(callback);
   };
 
   /**
