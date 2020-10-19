@@ -15,17 +15,8 @@ class NoteService {
    * @params {callback function} callback
    * @description find all notes
    */
-  findAllNotes = (data, callback) => {
-    return Note.findAllNotes(data, callback);
-  };
-
-  /**
-   * @params {object} data
-   * @params {callback function} callback
-   * @description find a note
-   */
-  findOneNote = (data, callback) => {
-    return Note.findOneNote(data, callback);
+  findAllNotes = (callback) => {
+    return Note.findAllNotes(callback);
   };
 
   /**

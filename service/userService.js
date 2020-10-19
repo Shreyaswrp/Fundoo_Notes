@@ -1,5 +1,6 @@
-const utility = require("../utility/utility.js");
-const userModel = require("../app/models/userModel.js");
+const utility = require("../utility/utility");
+const userModel = require("../app/models/userModel");
+const lib = require("../lib/sendMail");
 
 class UserService {
   /**
@@ -30,6 +31,7 @@ class UserService {
    * @params {callback function} callback
    * @description let a user login by providing correct id and password
    */
+  
   loginUser = (data, callback) => {
     userModel.findUser(data, (err, result) => {
       if (err || result == null) {
@@ -37,7 +39,13 @@ class UserService {
       } else {
         const res = utility.comparePasswords(data.password, result.password);
         if (res) {
-          return callback(null, result);
+          const token = utility.generateToken(result._id);
+          const obj = {
+            emailId: result.emailId,
+            emailVerifytoken: token,
+          }
+          userModel.updateUserToken(obj, callback);
+          return callback(null, result, token);
         } else {
           return callback("Incorrect_password", null);
         }
@@ -51,7 +59,16 @@ class UserService {
    * @description send reset link in case the password is forgotten
    */
   forgotPassword = (data, callback) => {
-    return userModel.findUser(data, callback);
+    userModel.findUser(data, (err, result) => {
+      if(err) {
+        return callback(err, null);
+      }else {
+        let flag = true;
+        const token = utility.generateToken(result._id);
+        lib.sendEmail(token, result.emailId, flag);
+        return callback(null, result);
+      }
+    });
   };
 
   /**
@@ -60,11 +77,16 @@ class UserService {
    * @description update the password by the reset link provided
    */
   resetPassword = (data, callback) => {
-    const obj = {
-      emailId: data.emailId,
+    try{
+     const decodedValue = utility.verifyToken(data.token);
+     const obj = {
+      emailId: decodedValue.data.emailId,
       password: utility.hashPassword(data),
     };
     return userModel.updateUser(obj, callback);
+    }catch (err) {
+      return callback(err, null);
+    }
   };
 
   /**
@@ -72,13 +94,23 @@ class UserService {
    * @params {callback function} callback
    * @description verfify email address of a user
    */
+  
   verifyEmail = (data, callback) => {
-    const obj = {
-      emailId: data.emailId,
-      isEmailVerified: data.isEmailVerified,
-    };
-    return userModel.updateUserEmailVerification(obj, callback);
-  };
+    userModel.findUser(data, (err, result) => {
+      if(err) {
+        return callback(err, null);
+       } else {
+        const decodedValue = utility.verifyToken(result.emailVerifytoken);
+        if (decodedValue.data == data.emailId){
+        lib.sendEmailVerificationMail(result.emailId);
+        const obj = {
+        emailId: data.emailId,
+        isEmailVerified: true,
+        };
+        return userModel.updateUserEmailVerification(obj, callback);
+      }
+      }
+  });
+};
 }
-
 module.exports = new UserService();
