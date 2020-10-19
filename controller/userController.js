@@ -5,7 +5,6 @@
  *
  * @description    : Actions to be done when http methods are called.
  *
- *
  * @file           : userController.js
  * @overview       : Actions of http methods
  * @module         : controller
@@ -18,6 +17,7 @@ const userService = require("../service/userService");
 const utility = require("../utility/utility");
 const lib = require("../lib/sendMail");
 const logger = require("../config/logger");
+const response = require('../utility/static');
 
 class UserRegistration {
   /**
@@ -28,14 +28,12 @@ class UserRegistration {
   registerUser = (req, res) => {
     var responseResult = {};
     logger.info("request body" + JSON.stringify(req.body));
-
     if (req.body != null || req.body != undefined) {
       //validate request
       const { error } = utility.validateUser(req.body);
       if (error) {
         logger.error("error validate" + error);
-        responseResult.success = false;
-        responseResult.message = "Could not register a user";
+        responseResult = response.registerUserError();
         res.status(422).send(responseResult);
       }
       const userDetails = {
@@ -44,32 +42,24 @@ class UserRegistration {
         emailId: req.body.emailId,
         password: req.body.password,
       };
-      let flag = false;
-      const token = utility.generateToken(userDetails);
       userService.registerUser(userDetails, (err, result) => {
         if (err) {
           logger.error("error" + err);
-          responseResult.success = false;
-          responseResult.message = "Could not register a user";
+          responseResult = response.registerUserError();
           res.status(422).send(responseResult);
         } else if (result == "user_exists") {
           logger.error("error" + result);
-          responseResult.success = false;
-          responseResult.message = "User already exists with this email id.";
+          responseResult = response.errorUserExists();
           res.status(404).send(responseResult);
         } else {
-          lib.sendEmail(token, result.emailId, flag);
-          logger.info("respnse data" + result);
-          responseResult.success = true;
-          responseResult.data = result;
-          responseResult.message = "User created successfully.";
+          logger.info("response data" + result);
+          responseResult = response.successRegisterResponse(result);
           res.status(201).send(responseResult);
         }
       });
     } else {
-      responseResult.success = false;
-      responseResult.message = "Invalid Request";
-      res.status(422).send(responseResult);
+          responseResult = response.invalidRequest();
+          res.status(422).send(responseResult);
     }
   };
 
@@ -81,32 +71,25 @@ class UserRegistration {
   loginUser = (req, res) => {
     var responseResult = {};
     logger.info("request body" + JSON.stringify(req.body));
-
     if (req.body != null || req.body != undefined) {
       const obj = {
         emailId: req.body.emailId,
         password: req.body.password,
       };
-      userService.loginUser(obj, (err, result) => {
+      userService.loginUser(obj, (err, result, token) => {
         if (err || result == null) {
           logger.error("error" + err);
-          responseResult.success = false;
-          responseResult.message =
-            "Incorrect password or email id ! login failed.";
+          responseResult = response.loginFailed();
           res.status(422).send(responseResult);
         } else {
           logger.info("response data" + result);
-          responseResult.success = true;
-          const token = utility.generateToken(result._id);
-          responseResult.token = token;
-          responseResult.message = "logged in successfully.";
+          responseResult = response.loginSuccess(token);
           res.status(201).send(responseResult);
         }
       });
     } else {
-      responseResult.success = false;
-      responseResult.message = "Invalid Request";
-      res.status(422).send(responseResult);
+        responseResult = response.invalidRequest();
+        res.status(422).send(responseResult);
     }
   };
 
@@ -122,27 +105,19 @@ class UserRegistration {
       const obj = {
         emailId: req.body.emailId,
       };
-      const token = utility.generateToken(obj);
       userService.forgotPassword(obj, (err, result) => {
         if (err || result == null) {
           logger.error("error" + err);
-          responseResult.success = false;
-          responseResult.message =
-            "couldn't find email to send reset password link";
+          responseResult = response.forgotPasswordError();
           res.status(422).send(responseResult);
         } else {
-          let flag = true;
           logger.info("response data" + result);
-          lib.sendEmail(token, result.emailId, flag);
-          responseResult.success = true;
-          responseResult.message =
-            "A reset password link has been sent to your email successfully";
-          res.status(201).send(responseResult);
+          responseResult = response.forgotPasswordSuccess();
+          res.status(200).send(responseResult);
         }
       });
     } else {
-      responseResult.success = false;
-      responseResult.message = "Invalid Request";
+      responseResult = response.invalidRequest();
       res.status(422).send(responseResult);
     }
   };
@@ -154,38 +129,25 @@ class UserRegistration {
    */
   resetPassword = (req, res) => {
     var responseResult = {};
-    logger.info("request body" + JSON.stringify(req.body));
+    logger.info("request body" + JSON.stringify(req.headers));
     if (req.headers != null || req.headers != undefined) {
-      let decodedValue = "";
-      let obj = "";
-      try {
-        decodedValue = utility.verifyToken(req.headers.token);
-        obj = {
-          emailId: decodedValue.data.emailId,
-          password: req.headers.password,
-        };
-      } catch (err) {
-        logger.error("error" + err);
-        responseResult.success = false;
-        responseResult.message = "Authentication error";
-        res.status(401).send(responseResult);
+      const obj = {
+        token: req.headers.token,
+        password: req.headers.password
       }
       userService.resetPassword(obj, (err, result) => {
         if (err) {
           logger.error("error" + err);
-          responseResult.success = false;
-          responseResult.message = "couldn't update password";
+          responseResult = response.resetPasswordError();
           res.status(422).send(responseResult);
         } else {
           logger.info("response data" + result);
-          responseResult.success = true;
-          responseResult.message = "Password updated successfully";
-          res.status(201).send(responseResult);
+          responseResult = response.resetPasswordSuccess();
+          res.status(200).send(responseResult);
         }
       });
     } else {
-      responseResult.success = false;
-      responseResult.message = "Authentication error! Request body not found";
+      responseResult = response.invalidRequest();
       res.status(422).send(responseResult);
     }
   };
@@ -197,32 +159,24 @@ class UserRegistration {
    */
   verifyEmailAddress = (req, res) => {
     var responseResult = {};
-    let decodedValue = "";
-    if (req.headers.token) {
-      decodedValue = utility.verifyToken(req.headers.token);
-      if (decodedValue.data.emailId == req.body.emailId) {
+    if (req.body) {
         const obj = {
           emailId: req.body.emailId,
-          isEmailVerified: true,
         };
-        return userService.verifyEmail(obj, (err, result) => {
+        userService.verifyEmail(obj, (err, result) => {
           if (err) {
             logger.error("error" + err);
-            responseResult.success = false;
-            responseResult.message = "couldn't verify email";
+            responseResult = response.emailVerifyError();
             res.status(422).send(responseResult);
           } else {
             logger.info("response data" + result);
-            responseResult.success = true;
-            responseResult.message =
-              "Your email address has been verified successfully.";
+            responseResult = response.emailVerifySuccess();
             res.status(200).send(responseResult);
           }
         });
       }
-    } else {
-      responseResult.success = false;
-      responseResult.message = "Email verification failed.";
+     else {
+      responseResult = response.invalidRequest();
       res.status(400).send(responseResult);
     }
   };
