@@ -41,7 +41,6 @@ exports.validateUser = (message) => {
     lastName: Joi.string().min(3).required(),
     password: Joi.string().min(8).required(),
     emailId: Joi.string().min(3).required(),
-    isEmailVerified: Joi.boolean(),
   });
   return schema.validate(message);
 };
