@@ -17,7 +17,10 @@
 const noteService = require("../service/noteService");
 const logger = require("../config/logger");
 const utility = require("../utility/utility");
-const response = require('../utility/static');
+const response = require("../utility/static");
+const redis = require("redis");
+const port_redis = process.env.REDIS_PORT || 6379;
+const redis_client = redis.createClient(port_redis);
 
 class Note {
   /**
@@ -28,41 +31,41 @@ class Note {
     var responseResult = {};
     logger.info("request body" + JSON.stringify(req.body));
     // Validate request
-    if (req.body != null || req.body != undefined) {  
-    //validate note content
-    const { error } = utility.validateNote(req.body);
-    if (error) {
-      logger.error("error validate" + error);
-      responseResult = response.createNoteError();
-      res.status(422).send(responseResult);
-    }
-    const decodedValue = utility.verifyToken(req.headers.token);
-    const noteDetails = {
-      title: req.body.title,
-      description: req.body.description,
-      userId: decodedValue.data,
-      reminder: req.body.reminder,
-      colour: req.body.colour,
-      image: req.body.image,
-      isPinned: req.body.isPinned,
-      isArchived: req.body.isArchived,
-      isDeleted: req.body.isArchived,
-    };
-    noteService.createNote(noteDetails, (err, data) => {
-      if (err) {
-        logger.error("error" + err);
+    if (req.body != null || req.body != undefined) {
+      //validate note content
+      const { error } = utility.validateNote(req.body);
+      if (error) {
+        logger.error("error validate" + error);
         responseResult = response.createNoteError();
         res.status(422).send(responseResult);
-      } else {
-        logger.info("response data" + data);
-        responseResult = response.createNoteSuccess(data);
-        res.status(201).send(responseResult);
       }
-    });
-  }else {
-    responseResult = response.invalidRequest();
-    res.status(422).send(responseResult);
-}
+      const decodedValue = utility.verifyToken(req.headers.token);
+      const noteDetails = {
+        title: req.body.title,
+        description: req.body.description,
+        userId: decodedValue.data,
+        reminder: req.body.reminder,
+        colour: req.body.colour,
+        image: req.body.image,
+        isPinned: req.body.isPinned,
+        isArchived: req.body.isArchived,
+        isDeleted: req.body.isArchived,
+      };
+      noteService.createNote(noteDetails, (err, data) => {
+        if (err) {
+          logger.error("error" + err);
+          responseResult = response.createNoteError();
+          res.status(422).send(responseResult);
+        } else {
+          logger.info("response data" + data);
+          responseResult = response.createNoteSuccess(data);
+          res.status(201).send(responseResult);
+        }
+      });
+    } else {
+      responseResult = response.invalidRequest();
+      res.status(422).send(responseResult);
+    }
   };
 
   /**
@@ -72,32 +75,23 @@ class Note {
   findAllNotes = (req, res) => {
     var responseResult = {};
     logger.info("request body" + JSON.stringify(req.headers.token));
-    if(req.headers.token){
-    noteService.findAllNotes( (err, data) => {
-      if (err) {
-        logger.error("error" + err);
-        responseResult = response.findNoteError();
-        res.status(422).send(responseResult);
-      } else {
-        /*redis_client.setex("notes", 3600, JSON.stringify(data));
-        redis_client.get("notes", (err, result) => {
-          if (err) {
-            throw err;
-          } else if (result != null) {
-            responseResult.success = true;
-            responseResult.data = result;
-            responseResult.message = "Notes found successfully from cache.";
-            res.status(200).send(responseResult);
-          } else {*/
-            logger.info("response data" + data);
-            responseResult = response.findNoteSuccess(data);
-            res.status(200).send(responseResult);
-          }
-        });
-      }else {
-          responseResult = response.invalidRequest();
+    if (req.headers.token) {
+      noteService.findAllNotes((err, data) => {
+        if (err) {
+          logger.error("error" + err);
+          responseResult = response.findNoteError();
           res.status(422).send(responseResult);
-      }
+        } else {
+          redis_client.setex("notes", 3600, JSON.stringify(data));
+          logger.info("response data" + data);
+          responseResult = response.findNoteSuccess(data);
+          res.status(200).send(responseResult);
+        }
+      });
+    } else {
+      responseResult = response.invalidRequest();
+      res.status(422).send(responseResult);
+    }
   };
 
   /**

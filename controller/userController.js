@@ -15,15 +15,14 @@
 
 const userService = require("../service/userService");
 const utility = require("../utility/utility");
-const lib = require("../lib/sendMail");
 const logger = require("../config/logger");
-const response = require('../utility/static');
+const response = require("../utility/static");
 
 class UserRegistration {
   /**
    * @description controller to past request to register user to service
-   * @params {object} data
-   * @params {response} http response
+   * @param {object} req http request
+   * @params {object} res http response
    */
   registerUser = (req, res) => {
     var responseResult = {};
@@ -34,7 +33,7 @@ class UserRegistration {
       if (error) {
         logger.error("error validate" + error);
         responseResult = response.registerUserError();
-        res.status(422).send(responseResult);
+        return res.status(422).send(responseResult);
       }
       const userDetails = {
         firstName: req.body.firstName,
@@ -46,37 +45,37 @@ class UserRegistration {
         if (err) {
           logger.error("error" + err);
           responseResult = response.registerUserError();
-          res.status(422).send(responseResult);
+          return res.status(422).send(responseResult);
         } else if (result == "user_exists") {
-          logger.error("error" + result);
+          logger.warning("warning" + result);
           responseResult = response.errorUserExists();
-          res.status(404).send(responseResult);
+          return res.status(404).send(responseResult);
         } else {
           logger.info("response data" + result);
           responseResult = response.successRegisterResponse(result);
-          res.status(201).send(responseResult);
+          return res.status(201).send(responseResult);
         }
       });
     } else {
-          responseResult = response.invalidRequest();
-          res.status(422).send(responseResult);
+      responseResult = response.invalidRequest();
+      return res.status(422).send(responseResult);
     }
   };
 
   /**
    * @description controller to past request to login user to service
-   * @param {object} data
-   * @params {response} http response
+   * @param {object} req http request
+   * @params {object} res http response
    */
   loginUser = (req, res) => {
     var responseResult = {};
     logger.info("request body" + JSON.stringify(req.body));
     if (req.body != null || req.body != undefined) {
-      const obj = {
+      const loginData = {
         emailId: req.body.emailId,
         password: req.body.password,
       };
-      userService.loginUser(obj, (err, result, token) => {
+      userService.loginUser(loginData, (err, result, token) => {
         if (err || result == null) {
           logger.error("error" + err);
           responseResult = response.loginFailed();
@@ -88,24 +87,24 @@ class UserRegistration {
         }
       });
     } else {
-        responseResult = response.invalidRequest();
-        res.status(422).send(responseResult);
+      responseResult = response.invalidRequest();
+      res.status(422).send(responseResult);
     }
   };
 
   /**
    * @description controller to past request to forgot password to service
-   * @param {object} data
-   * @params {response} http response
+   * @param {object} req http request
+   * @params {object} res http response
    */
   forgotPassword = (req, res) => {
     var responseResult = {};
     logger.info("request body" + JSON.stringify(req.body));
     if (req.body != null || req.body != undefined) {
-      const obj = {
+      const emailToResetPassword = {
         emailId: req.body.emailId,
       };
-      userService.forgotPassword(obj, (err, result) => {
+      userService.forgotPassword(emailToResetPassword, (err, result) => {
         if (err || result == null) {
           logger.error("error" + err);
           responseResult = response.forgotPasswordError();
@@ -124,18 +123,18 @@ class UserRegistration {
 
   /**
    * @description controller to past request to forgot password to service
-   * @param {object} data
-   * @params {response} http response
+   * @param {object} req http request
+   * @params {object} res http response
    */
   resetPassword = (req, res) => {
     var responseResult = {};
     logger.info("request body" + JSON.stringify(req.headers));
     if (req.headers != null || req.headers != undefined) {
-      const obj = {
+      const newPassword = {
         token: req.headers.token,
-        password: req.headers.password
-      }
-      userService.resetPassword(obj, (err, result) => {
+        password: req.headers.password,
+      };
+      userService.resetPassword(newPassword, (err, result) => {
         if (err) {
           logger.error("error" + err);
           responseResult = response.resetPasswordError();
@@ -154,28 +153,28 @@ class UserRegistration {
 
   /**
    * @description controller to past request to verify email id to service
-   * @param {object} data
-   * @params {response} http response
+   * @param {object} req http request
+   * @params {object} res http response
    */
   verifyEmailAddress = (req, res) => {
     var responseResult = {};
-    if (req.body) {
-        const obj = {
-          emailId: req.body.emailId,
-        };
-        userService.verifyEmail(obj, (err, result) => {
-          if (err) {
-            logger.error("error" + err);
-            responseResult = response.emailVerifyError();
-            res.status(422).send(responseResult);
-          } else {
-            logger.info("response data" + result);
-            responseResult = response.emailVerifySuccess();
-            res.status(200).send(responseResult);
-          }
-        });
-      }
-     else {
+    if (req.body != null || req.body != undefined) {
+      const emailToVerify = {
+        emailId: req.body.emailId,
+        token: req.headers.token,
+      };
+      userService.verifyEmail(emailToVerify, (err, result) => {
+        if (err || result == null) {
+          logger.error("error" + err);
+          responseResult = response.emailVerifyError();
+          res.status(422).send(responseResult);
+        } else {
+          logger.info("response data" + result);
+          responseResult = response.emailVerifySuccess();
+          res.status(200).send(responseResult);
+        }
+      });
+    } else {
       responseResult = response.invalidRequest();
       res.status(400).send(responseResult);
     }
