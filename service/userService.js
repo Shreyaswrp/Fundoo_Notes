@@ -1,6 +1,7 @@
 const utility = require("../utility/utility");
 const userModel = require("../app/models/userModel");
 const lib = require("../lib/sendMail");
+require("dotenv/config");
 
 class UserService {
   /**
@@ -21,6 +22,14 @@ class UserService {
       } else if (result != null) {
         return callback(null, "user_exists");
       } else {
+        const token = utility.generateToken(data.emailId);
+        const mailContent = {
+          receiverEmail: data.emailId,
+          subject: "Email to verify email address",
+          content: `<h2>Please click on given link to verify your email address</h2>
+                   <span>${process.env.CLIENT_URL}/activate/${token}</span>`,
+        };
+        lib.sendEmail(mailContent);
         return userModel.createUser(userDetails, callback);
       }
     });
@@ -31,7 +40,6 @@ class UserService {
    * @params {callback function} callback
    * @description let a user login by providing correct id and password
    */
-  
   loginUser = (data, callback) => {
     userModel.findUser(data, (err, result) => {
       if (err || result == null) {
@@ -40,11 +48,6 @@ class UserService {
         const res = utility.comparePasswords(data.password, result.password);
         if (res) {
           const token = utility.generateToken(result._id);
-          const obj = {
-            emailId: result.emailId,
-            emailVerifytoken: token,
-          }
-          userModel.updateUserToken(obj, callback);
           return callback(null, result, token);
         } else {
           return callback("Incorrect_password", null);
@@ -60,12 +63,17 @@ class UserService {
    */
   forgotPassword = (data, callback) => {
     userModel.findUser(data, (err, result) => {
-      if(err) {
+      if (err) {
         return callback(err, null);
-      }else {
-        let flag = true;
+      } else {
         const token = utility.generateToken(result._id);
-        lib.sendEmail(token, result.emailId, flag);
+        const mailContent = {
+          receiverEmail: result.emailId,
+          subject: "Email to reset password",
+          content: `<h2>Please click on given link to reset your password</h2>
+                     <span>${process.env.CLIENT_URL}/forgot-password/${token}</span>`,
+        };
+        lib.sendEmail(mailContent);
         return callback(null, result);
       }
     });
@@ -77,14 +85,14 @@ class UserService {
    * @description update the password by the reset link provided
    */
   resetPassword = (data, callback) => {
-    try{
-     const decodedValue = utility.verifyToken(data.token);
-     const obj = {
-      emailId: decodedValue.data.emailId,
-      password: utility.hashPassword(data),
-    };
-    return userModel.updateUser(obj, callback);
-    }catch (err) {
+    try {
+      const decodedValue = utility.verifyToken(data.token);
+      const obj = {
+        emailId: decodedValue.data.emailId,
+        password: utility.hashPassword(data),
+      };
+      return userModel.updateUser(obj, callback);
+    } catch (err) {
       return callback(err, null);
     }
   };
@@ -94,23 +102,28 @@ class UserService {
    * @params {callback function} callback
    * @description verfify email address of a user
    */
-  
+
   verifyEmail = (data, callback) => {
     userModel.findUser(data, (err, result) => {
-      if(err) {
+      if (err || result == null) {
         return callback(err, null);
-       } else {
-        const decodedValue = utility.verifyToken(result.emailVerifytoken);
-        if (decodedValue.data == data.emailId){
-        lib.sendEmailVerificationMail(result.emailId);
-        const obj = {
-        emailId: data.emailId,
-        isEmailVerified: true,
-        };
-        return userModel.updateUserEmailVerification(obj, callback);
+      } else {
+        const decodedValue = utility.verifyToken(data.token);
+        if (decodedValue.data == result.emailId) {
+          const mailContent = {
+            receiverEmail: result.emailId,
+            subject: "Email verification confirmation",
+            content: `<h2>Your email id has been verified.</h2>`,
+          };
+          lib.sendEmail(mailContent);
+          const obj = {
+            emailId: data.emailId,
+            isEmailVerified: true,
+          };
+          return userModel.updateUserEmailVerification(obj, callback);
+        }
       }
-      }
-  });
-};
+    });
+  };
 }
 module.exports = new UserService();
