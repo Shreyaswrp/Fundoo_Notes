@@ -1,13 +1,13 @@
 const bcrypt = require("bcrypt");
-const dotenv = require("dotenv");
-dotenv.config();
+config = require("dotenv/config");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
-const lib = require("../lib/sendMail");
 
 //generate token
 exports.generateToken = (data) => {
-  const token = jwt.sign({ data }, process.env.TOKEN_SECRET, {expiresIn: "24h",});
+  const token = jwt.sign({ data }, process.env.TOKEN_SECRET, {
+    expiresIn: "24h",
+  });
   return token;
 };
 
@@ -34,7 +34,7 @@ exports.comparePasswords = (pass1, pass2) => {
   }
 };
 
-//validate request body
+//validate user content
 exports.validateUser = (message) => {
   const schema = Joi.object({
     firstName: Joi.string().min(3).required(),
@@ -60,5 +60,3 @@ exports.validateNote = (message) => {
   });
   return schema.validate(message);
 };
-
-
