@@ -1,17 +1,36 @@
-const logger = require('./logger');
-// Configuring the database
-require('dotenv/config');
-const mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
+var mongoose = require("mongoose");
+logger = require("./logger");
+config = require("dotenv/config");
 
-// Connecting to the database
-const DB_CONFIG = mongoose.connect(process.env.DB_CONNECTION, {
-    useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, 'useCreateIndex': true
-}).then(() => {
-    logger.info("Successfully connected to the database");    
-}).catch(err => {
-    logger.error('Could not connect to the database. Exiting now...', err);
-    process.exit();
+mongoose.connection.on("connecting", function () {
+  logger.info("trying to establish a connection to mongo");
 });
 
-module.exports = mongoose.DB_CONFIG;
+mongoose.connection.on("connected", function () {
+  logger.info("connection established successfully");
+});
+
+mongoose.connection.on("error", function (err) {
+  logger.error("connection to mongo failed " + err);
+});
+
+mongoose.connection.on("disconnected", function () {
+  logger.info("mongo db connection closed");
+});
+
+var db = mongoose.connect(process.env.DB_CONNECTION, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+});
+
+var gracefulExit = function () {
+  db.close(function () {
+    logger.log(
+      "mongoose connection with db " + process.env.DB_CONNECTION + "is closing"
+    );
+    process.exit(0);
+  });
+};
+
+module.exports = db;
