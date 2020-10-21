@@ -69,14 +69,22 @@ class UserModel {
   /**
    * @params {object} data
    * @params {callback function} callback
+   * @description find a user in the database
+   */
+  findUserById = (data, callback) => {
+    return userModel.findById(data, callback);
+  };
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
    * @description update user's password in the database
    */
   updateUser = (data, callback) => {
     return userModel.updateOne(
       { emailId: data.emailId },
       { password: data.password },
-      callback
-    );
+      callback);
   };
 
   /**
@@ -88,8 +96,7 @@ class UserModel {
     return userModel.updateOne(
       { emailId: data.emailId },
       { isEmailVerified: data.isEmailVerified },
-      callback
-    );
+      callback);
   };
 }
 
