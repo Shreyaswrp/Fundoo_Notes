@@ -62,7 +62,7 @@ class NoteModel {
       image: data.image,
       isPinned: data.isPinned,
       isArchived: data.isArchived,
-      isDeleted: data.isArchived,
+      isDeleted: data.isDeleted,
     });
     return noteData.save(callback);
   };
@@ -72,9 +72,8 @@ class NoteModel {
    * @params {callback function} callback
    * @description Retrieve and return all notes from the database.
    */
-  findAllNotes = (data, callback) => {
-    console.log(data);
-    return Note.findById(data, callback);
+  findAllNotes = (callback) => {
+    return Note.find(callback);
   };
 
   /**
@@ -82,8 +81,8 @@ class NoteModel {
    * @params {callback function} callback
    * @description Update a note identified by the noteId in the request
    */
-  updateNote = (id, data, callback) => {
-    return Note.findByIdAndUpdate(id, data, { new: true }, callback);
+  updateNote = (data, callback) => {
+    return Note.findByIdAndUpdate(data._id, data.fields, { new: true }, callback);
   };
 
   /**
@@ -99,6 +98,15 @@ class NoteModel {
         return callback(null, "Note_deleted");
       }
     });
+  };
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description Get all notes of a logged in user
+   */
+  find = (data, callback) => {
+    return Note.findOne({userId: data}, callback);
   };
 }
 
