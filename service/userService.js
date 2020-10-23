@@ -10,29 +10,29 @@ class UserService {
    * @description register a new user in the database
    */
   registerUser = (data, callback) => {
-    var userDetails = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      emailId: data.emailId,
-      password: utility.hashPassword(data),
-    };
-    userModel.findUser(userDetails, (err, result) => {
-      if (err) {
-        return callback(err, null);
-      } else if (result != null) {
-        return callback(null, "user_exists");
-      } else {
-        const token = utility.generateToken(data.emailId);
-        const mailContent = {
+  var userDetails = {
+    firstName: data.firstName,
+    lastName: data.lastName,
+    emailId: data.emailId,
+    password: utility.hashPassword(data),
+  };
+  userModel.findUser(userDetails, (err, result) => {
+    if (err) {
+      return callback(err, null);
+    } else if (result != null) {
+      return callback(null, "user_exists");
+    } else {
+      const token = utility.generateToken(data.emailId);
+      const mailContent = {
           receiverEmail: data.emailId,
           subject: "Email to verify email address",
           content: `<h2>Please click on given link to verify your email address</h2>
                    <span>${process.env.CLIENT_URL}/activate/${token}</span>`,
-        };
-        lib.sendEmail(mailContent);
-        return userModel.createUser(userDetails, callback);
-      }
-    });
+      };
+      lib.sendEmail(mailContent);
+      return userModel.createUser(userDetails, callback);
+    }
+  });
   };
 
   /**
@@ -42,17 +42,21 @@ class UserService {
    */
   loginUser = (data, callback) => {
     userModel.findUser(data, (err, result) => {
-      if (err || result == null) {
-        return callback(err, null);
+    if (err || result == null) {
+      return callback(err, null);
+    } else {
+      if(result.isEmailVerified){
+      const res = utility.comparePasswords(data.password, result.password);
+      if (res) {
+      const token = utility.generateToken(result._id);
+      return callback(null, result, token);
       } else {
-        const res = utility.comparePasswords(data.password, result.password);
-        if (res) {
-          const token = utility.generateToken(result._id);
-          return callback(null, result, token);
-        } else {
-          return callback("Incorrect_password", null);
-        }
+      return callback("Incorrect_password", null);
       }
+      }else {
+        return callback('Verify_Email', null);
+      }
+    }
     });
   };
 
@@ -102,28 +106,36 @@ class UserService {
    * @params {callback function} callback
    * @description verfify email address of a user
    */
-
   verifyEmail = (data, callback) => {
     userModel.findUser(data, (err, result) => {
-      if (err || result == null) {
+    if (err || result == null) {
         return callback(err, null);
-      } else {
-        const decodedValue = utility.verifyToken(data.token);
-        if (decodedValue.data == result.emailId) {
-          const mailContent = {
-            receiverEmail: result.emailId,
-            subject: "Email verification confirmation",
-            content: `<h2>Your email id has been verified.</h2>`,
-          };
-          lib.sendEmail(mailContent);
-          const obj = {
+    } else {
+  const decodedValue = utility.verifyToken(data.token);
+  if (decodedValue.data == result.emailId) {
+    const mailContent = {
+      receiverEmail: result.emailId,
+      subject: "Email verification confirmation",
+      content: `<h2>Your email id has been verified.</h2>`,
+      };
+      lib.sendEmail(mailContent);
+      const contentToUpdate = {
             emailId: data.emailId,
             isEmailVerified: true,
-          };
-          return userModel.updateUserEmailVerification(obj, callback);
-        }
+      };
+      return userModel.updateUserEmailVerification(contentToUpdate, callback);
+      }
       }
     });
   };
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description get authorized user
+   */
+  getAuthorizedUser = (data, callback) => {
+    return userModel.findUserById(data, callback);
+  }
 }
 module.exports = new UserService();
