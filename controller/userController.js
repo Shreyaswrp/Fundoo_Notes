@@ -16,7 +16,6 @@
 const userService = require("../service/userService");
 const utility = require("../utility/utility");
 const logger = require("../config/logger");
-const response = require("../utility/static");
 
 class UserRegistration {
   /**
@@ -32,7 +31,8 @@ class UserRegistration {
       const { error } = utility.validateUser(req.body);
       if (error) {
         logger.error("error validate" + error);
-        responseResult = response.registerUserError();
+        responseResult.success = false;
+        responseResult.message = "Could not register a user";
         return res.status(422).send(responseResult);
       }
       const userDetails = {
@@ -44,20 +44,25 @@ class UserRegistration {
       userService.registerUser(userDetails, (err, result) => {
         if (err) {
           logger.error("error" + err);
-          responseResult = response.registerUserError();
+          responseResult.success = false;
+          responseResult.message = "Could not register a user";
           return res.status(422).send(responseResult);
         } else if (result == "user_exists") {
-          logger.warning("warning" + result);
-          responseResult = response.errorUserExists();
+          logger.log("error", + result);
+          responseResult.success = false;
+          responseResult.message = "User already exists with this email id.";
           return res.status(404).send(responseResult);
         } else {
           logger.info("response data" + result);
-          responseResult = response.successRegisterResponse(result);
+          responseResult.success = true;
+          responseResult.data = result;
+          responseResult.message = "User created successfully.";
           return res.status(201).send(responseResult);
         }
       });
     } else {
-      responseResult = response.invalidRequest();
+      responseResult.success = false;
+      responseResult.message = "Invalid Request";
       return res.status(422).send(responseResult);
     }
   };
@@ -76,19 +81,28 @@ class UserRegistration {
         password: req.body.password,
       };
       userService.loginUser(loginData, (err, result, token) => {
-        if (err || result == null) {
+        if (err == "Verify_Email") {
+          logger.error('error' + err);
+          responseResult.success = false;
+          responseResult.message = "Login failed.Verify your email first.";
+          return res.status(422).send(responseResult);
+        } else if (err || result == null) {
           logger.error("error" + err);
-          responseResult = response.loginFailed();
-          res.status(422).send(responseResult);
+          responseResult.success = false;
+          responseResult.message = "Incorrect password or email id ! login failed.";
+          return res.status(422).send(responseResult);
         } else {
           logger.info("response data" + result);
-          responseResult = response.loginSuccess(token);
-          res.status(201).send(responseResult);
+          responseResult.success = true;
+          responseResult.token = token;
+          responseResult.message = "logged in successfully.";
+          return res.status(201).send(responseResult);
         }
       });
     } else {
-      responseResult = response.invalidRequest();
-      res.status(422).send(responseResult);
+      responseResult.success = false;
+      responseResult.message = "Invalid Request";
+      return res.status(422).send(responseResult);
     }
   };
 
@@ -107,17 +121,20 @@ class UserRegistration {
       userService.forgotPassword(emailToResetPassword, (err, result) => {
         if (err || result == null) {
           logger.error("error" + err);
-          responseResult = response.forgotPasswordError();
-          res.status(422).send(responseResult);
+          responseResult.success = false;
+          responseResult.message = "couldn't find email to send reset password link";
+          return res.status(422).send(responseResult);
         } else {
           logger.info("response data" + result);
-          responseResult = response.forgotPasswordSuccess();
-          res.status(200).send(responseResult);
+          responseResult.success = true;
+          responseResult.message = "A reset password link has been sent to your email successfully";
+          return res.status(200).send(responseResult);
         }
       });
     } else {
-      responseResult = response.invalidRequest();
-      res.status(422).send(responseResult);
+      responseResult.success = false;
+      responseResult.message = "Invalid Request";
+      return res.status(422).send(responseResult);
     }
   };
 
@@ -137,17 +154,20 @@ class UserRegistration {
       userService.resetPassword(newPassword, (err, result) => {
         if (err) {
           logger.error("error" + err);
-          responseResult = response.resetPasswordError();
-          res.status(422).send(responseResult);
+          responseResult.success = false;
+          responseResult.message = "couldn't update password";
+          return res.status(422).send(responseResult);
         } else {
           logger.info("response data" + result);
-          responseResult = response.resetPasswordSuccess();
-          res.status(200).send(responseResult);
+          responseResult.success = true;
+          responseResult.message = "Password updated successfully";
+          return res.status(200).send(responseResult);
         }
       });
     } else {
-      responseResult = response.invalidRequest();
-      res.status(422).send(responseResult);
+      responseResult.success = false;
+      responseResult.message = "Invalid Request";
+      return res.status(422).send(responseResult);
     }
   };
 
@@ -166,18 +186,30 @@ class UserRegistration {
       userService.verifyEmail(emailToVerify, (err, result) => {
         if (err || result == null) {
           logger.error("error" + err);
-          responseResult = response.emailVerifyError();
-          res.status(422).send(responseResult);
+          responseResult.success = false;
+          responseResult.message = "couldn't verify email";
+          return res.status(422).send(responseResult);
         } else {
           logger.info("response data" + result);
-          responseResult = response.emailVerifySuccess();
-          res.status(200).send(responseResult);
+          responseResult.success = true;
+          responseResult.message = "Your email address has been verified successfully.";
+          return res.status(200).send(responseResult);
         }
       });
     } else {
-      responseResult = response.invalidRequest();
-      res.status(400).send(responseResult);
+      responseResult.success = false;
+      responseResult.message = "Invalid Request";
+      return res.status(400).send(responseResult);
     }
+  };
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description get authorized user
+   */
+  getAuthorizedUser = (data, callback) => {
+    return userService.getAuthorizedUser(data, callback);
   };
 }
 

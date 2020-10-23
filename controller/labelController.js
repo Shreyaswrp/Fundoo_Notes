@@ -14,52 +14,46 @@
  *
  * **********************************************************/
 
-const noteService = require("../service/noteService");
+const labelService = require("../service/labelService");
 const logger = require("../config/logger");
 const utility = require("../utility/utility");
 
-class Note {
+class Label {
   /**
-   * @description controller to past request to create note to service
+   * @description controller to past request to create label to service
    * @param {object} req http request
    * @params {object} res http response
    */
-  createNote = (req, res) => {
+  createLabel = (req, res) => {
     var responseResult = {};
     logger.info("request body" + JSON.stringify(req.body));
     // Validate request
     if (req.body != null || req.body != undefined) {
       //validate note content
-      const { error } = utility.validateNote(req.body);
+      const { error } = utility.validateLabel(req.body);
       if (error) {
         logger.error("error validate" + error);
         responseResult.success = false;
-        responseResult.message = "Could not create a note";
+        responseResult.message = "Could not create a label.";
         return res.status(422).send(responseResult);
       }
       const decodedValue = utility.verifyToken(req.headers.token);
-      const noteDetails = {
-        title: req.body.title,
-        description: req.body.description,
+      const labelDetails = {
+        name: req.body.name,
+        noteId: req.headers.note,
         userId: decodedValue.data,
-        reminder: req.body.reminder,
-        colour: req.body.colour,
-        image: req.body.image,
-        isPinned: req.body.isPinned,
-        isArchived: req.body.isArchived,
-        isDeleted: req.body.isDeleted,
       };
-      noteService.createNote(noteDetails, (err, data) => {
+      labelService.createLabel(labelDetails, (err, data) => {
         if (err) {
           logger.error("error" + err);
           responseResult.success = false;
-          responseResult.message = "Could not create a note";
+          responseResult.message = "Could not create a label";
           return res.status(422).send(responseResult);
         } else {
           logger.info("response data" + data);
           responseResult.success = true;
           responseResult.data = data;
-          responseResult.message = "Note created successfully";
+          responseResult.message = "Label created successfully for the note";
           return res.status(201).send(responseResult);
         }
       });
@@ -70,42 +64,14 @@ class Note {
     }
   };
 
-  /**
-   * @description Retrieve and return all notes from the database.
-   * @param {object} req http request
-   * @params {object} res http response
-   */
-  findAllNotes = (req, res) => {
-    var responseResult = {};
-    logger.info("request body" + JSON.stringify(req.headers.token));
-    if (req.headers.token) {
-      noteService.findAllNotes((err, data) => {
-        if (err) {
-          logger.error("error" + err);
-          responseResult.success = false;
-          responseResult.message = "Could not find notes";
-          return res.status(422).send(responseResult);
-        } else {
-          logger.info("response data" + data);
-          responseResult.success = true;
-          responseResult.data = data
-          responseResult.message = "Notes found successfully";
-          return res.status(200).send(responseResult);
-        }
-      });
-    } else {
-      responseResult.success = false;
-      responseResult.message = "Invalid Request";
-      return res.status(422).send(responseResult);
-    }
-  };
 
   /**
-   * @description Update notes from the database.
+   * @description Update labels from the database.
    * @param {object} req http request
    * @params {object} res http response
    */
-  updateNote = (req, res) => {
+  updateLabel = (req, res) => {
+    console.log('in update');
     var responseResult = {};
     // Validate request
     if (!req.body) {
@@ -115,54 +81,55 @@ class Note {
     }
     logger.info("request body" + JSON.stringify(req.body));
     let regexConst = new RegExp(/^[a-fA-F0-9]{24}$/);
-    if (!regexConst.test(req.params.noteId)) {
+    if (!regexConst.test(req.params.labelId)) {
       responseResult.success = false;
       responseResult.message = "Incorrect id.Give proper id";
       return res.status(422).send(responseResult);
     }
     const contentToUpdate = {
       fields: req.body,
-      _id: req.params.noteId
+      _id: req.params.labelId
     };
-    noteService.updateNote(contentToUpdate, (err, data) => {
+    labelService.updateLabel(contentToUpdate, (err, data) => {
       if (err) {
         logger.error("error" + err);
         responseResult.success = false;
-        responseResult.message = "Could not update the note";
+        responseResult.message = "Could not update the label";
         return res.status(422).send(responseResult);
       } else {
         logger.info("response data" + data);
         responseResult.success = true;
         responseResult.data = data;
-        responseResult.message = "The note updated sucessfully";
+        responseResult.message = "The label updated sucessfully";
         return res.status(200).send(responseResult);
       }
     });
   };
 
   /**
-   * @description Delete notes from the database.
+   * @description Delete labels from the database.
    * @param {object} req http request
    * @params {object} res http response
    */
-  deleteNote = (req, res) => {
+  deleteLabel = (req, res) => {
     var responseResult = {};
-    logger.info("id provided" + JSON.stringify(req.params.noteId));
+    logger.info("id provided" + JSON.stringify(req.params.labelId));
     let regexConst = new RegExp(/^[a-fA-F0-9]{24}$/);
-    if (!regexConst.test(req.params.noteId)) {
-      responseResult = response.NoteIdError();
-      return res.status(400).send(responseResult);
+    if (!regexConst.test(req.params.labelId)) {
+      responseResult.success = false;
+      responseResult.message = "Incorrect id.Give proper id";
+      return res.status(422).send(responseResult);
     }
-    noteService.deleteNote(req.params.noteId, (err, data) => {
+    labelService.deleteLabel(req.params.labelId, (err, data) => {
       if (err || data == null) {
         logger.error("error" + err);
         responseResult.success = false;
-        responseResult.message = "Could not delete the note";
+        responseResult.message = "Could not delete the label";
         return res.status(422).send(responseResult);
       } else {
         logger.info("response data" + data);
         responseResult.success = true;
-        responseResult.message = "The note deleted sucessfully";
+        responseResult.message = "The label deleted sucessfully";
         return res.status(200).send(responseResult);
       }
     });
@@ -173,24 +140,23 @@ class Note {
    * @param {Object} req
    * @param {Object} res
    */
-  getUserNotes = (req, res) => {
+  getUserLabels = (req, res) => {
     var responseResult = {};
-    let value = utility.verifyToken(req.headers.token);
-    let id = value.data;
-    noteService.getNotesByUserId(id, (err, result) => {
+    let noteId = req.headers.note
+    labelService.getLabelsByUserId(noteId, (err, result) => {
       if (err) {
         logger.error("error" + err);
         responseResult.success = false;
-        responseResult.message = "Could not find notes";
+        responseResult.message = "Could not find labels";
         return res.status(422).send(responseResult);
       }else {
         logger.info("response data" + result);
         responseResult.success = true;
         responseResult.data = result;
-        responseResult.message = "Notes found successfully";
+        responseResult.message = "Labels found successfully";
         return res.status(200).send(responseResult);
       }  
     })
   }
 }
-module.exports = new Note();
+module.exports = new Label();
