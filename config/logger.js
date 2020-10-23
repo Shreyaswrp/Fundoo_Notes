@@ -13,16 +13,6 @@ const logger = createLogger({
       level: "error",
       format: format.combine(format.timestamp(), format.json()),
     }),
-    new transports.File({
-      filename: "./log/warning.log",
-      level: "warning",
-      format: format.combine(format.timestamp(), format.json()),
-    }),
-    new transports.File({
-      filename: "./log/debug.log",
-      level: "debug",
-      format: format.combine(format.timestamp(), format.json()),
-    }),
   ],
 });
 

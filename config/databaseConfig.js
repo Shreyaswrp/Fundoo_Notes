@@ -9,118 +9,106 @@ var DEBUG_ALREADY_DISCONNECTING = 'Already disconnecting from db server %s.';
 var DEBUG_DISCONNECTED          = 'Successfully disconnected from db server %s.';
 var DEBUG_DISCONNECTION_ERROR   = 'An error has occured while disconnecting from db server %s.';
  
+require('dotenv/config');
 var blueBird    = require('bluebird');
 var mongoose    = require('mongoose');
 var debug       = require('debug');
-const logger = require('./logger');
-require('dotenv/config');
+var d           = debug('mongo-db-instance');
 
-class MongoDBAdapter {
-
+var db = new MongoDBAdapter(process.env.DB_CONNECTION, {useCreateIndex: true, useNewUrlParser: true , useUnifiedTopology: true  });
+ 
+var isState = function(state){
+ return mongoose.connection.readyState === mongoose.Connection.STATES[state];
+};
+ 
 /**
-* @constructor
 * @param {string} uri     - Mongoose connection URI.
 * @param {object} options - Mongoose connection options.
-*/  
-MongoDBAdapter = (uri, options) => {
-  this.uri     = uri;
-  this.options = options;
-}
-
-//returns states of mongodb connection
-isState = (state) => {
-  return mongoose.connection.readyState === mongoose.Connection.STATES[state];
-};
-
-/**
- * @description Add connection listeners without adding more than one for each event.
- */
-addConnectionListener = (event, cb) => {
-  var listeners = mongoose.connection._events;
-  if (!listeners || !listeners[event] || listeners[event].length === 0){
-    mongoose.connection.once(event, cb.bind(this));
-  }
-};
-  
-/**
- * @description Returns a promise that gets resolved when successfully connected to MongoDB URI, or rejected otherwise.
- * @returns {Promise} Returns promise
 */
-connect = () => {
-  return new blueBird((resolve, reject) => {
-    if (this.isState('connected')){
-      d(DEBUG_ALREADY_CONNECTED, this.uri);
-      return resolve(this.uri);
-    }
-
-    this.addConnectionListener('error', (err) => {
-      d(DEBUG_CONNECTION_ERROR, this.uri);
-      return reject(err);
-    });
-  
-    this.addConnectionListener('open', () =>{
-      d(DEBUG_CONNECTED, this.uri);
-      return resolve(this.uri);
-    });
-  
-    if (this.isState('connecting')){
-      d(DEBUG_ALREADY_CONNECTING, this.uri);
-    } else {
-      d(DEBUG_CONNECTING, this.uri);
-      mongoose.connect(this.uri, this.options);
-    }
-
-  }).bind(this);
-};
-  
-/**
- * @description Returns a promise that gets resolved when successfully disconnected from MongoDB URI, or rejected otherwise.
- * @return {Promise} Bluebird promise
-*/
-disconnect = () => {
-  return new blueBird((resolve, reject) => {
-    if (isState('disconnected') || isState('uninitialized')){
-      d(DEBUG_ALREADY_DISCONNECTED, this.uri);
-      return resolve(this.uri);
-    }
-  
-    this.addConnectionListener('error', (err) => {
-      d(DEBUG_DISCONNECTION_ERROR, this.uri);
-      return reject(err);
-    });
-  
-    this.addConnectionListener('disconnected', () => {
-      d(DEBUG_DISCONNECTED, this.uri);
-      return resolve(this.uri);
-    });
-  
-    if (isState('disconnecting')){
-      d(DEBUG_ALREADY_DISCONNECTING, this.uri);
-    } else {
-      d(DEBUG_DISCONNECTING, this.uri);
-      mongoose.disconnect();
-    }
-  }).bind(this);
-};
-
-  //Connecting to the database
-  DB_CONFIG = mongoose.connect(process.env.DB_CONNECTION, {
-    useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true,
-    }).then(() => {
-      logger.log('info', "Successfully connected to the database");
-      return mongoose.disconnect();    
-    }).catch(err => {
-      logger.log('error', 'Could not connect to the database. Exiting now...', err);
-      process.exit();
-  });
+function MongoDBAdapter(uri, options){
+ this.uri     = uri;
+ this.options = options;
 }
-
-const d = debug(new MongoDBAdapter());
-
-// Export the mongodb connection instance
-module.exports = new MongoDBAdapter(process.env.DB_CONNECTION, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-});
  
+/**
+* @description Add connection listeners without adding more than one for each event.
+*/
+MongoDBAdapter.prototype.addConnectionListener = function(event, cb){
+ var listeners = mongoose.connection._events;
+ if (!listeners || !listeners[event] || listeners[event].length === 0){
+   mongoose.connection.once(event, cb.bind(this));
+ }
+};
+ 
+/**
+* @description Returns a promise that gets resolved when successfully connected to MongoDB URI, or rejected otherwise.
+* @returns {Promise} Returns promise
+*/
+MongoDBAdapter.prototype.connect = function(){
+ return new blueBird(function(resolve, reject){
+   if (isState('connected')){
+     d(DEBUG_ALREADY_CONNECTED, this.uri);
+     return resolve(this.uri);
+   }
+ 
+   this.addConnectionListener('error', function(err){
+     d(DEBUG_CONNECTION_ERROR, this.uri);
+     return reject(err);
+   });
+ 
+   this.addConnectionListener('open', function(){
+     d(DEBUG_CONNECTED, this.uri);
+     return resolve(this.uri);
+   });
+ 
+   if (isState('connecting')){
+     d(DEBUG_ALREADY_CONNECTING, this.uri);
+   } else {
+     d(DEBUG_CONNECTING, this.uri);
+     mongoose.connect(this.uri, this.options);
+   }
+ 
+ }.bind(this));
+};
+ 
+/**
+* @description Returns a promise that gets resolved when successfully disconnected from MongoDB URI, or rejected otherwise.
+* @return {Promise} Bluebird promise
+*/
+MongoDBAdapter.prototype.disconnect = function(){
+ return new blueBird(function(resolve, reject){
+   if (isState('disconnected') || isState('uninitialized')){
+     d(DEBUG_ALREADY_DISCONNECTED, this.uri);
+     return resolve(this.uri);
+   }
+ 
+   this.addConnectionListener('error', function(err){
+     d(DEBUG_DISCONNECTION_ERROR, this.uri);
+     return reject(err);
+   });
+ 
+   this.addConnectionListener('disconnected', function(){
+     d(DEBUG_DISCONNECTED, this.uri);
+     return resolve(this.uri);
+   });
+ 
+   if (isState('disconnecting')){
+     d(DEBUG_ALREADY_DISCONNECTING, this.uri);
+   } else {
+     d(DEBUG_DISCONNECTING, this.uri);
+     mongoose.disconnect();
+   }
+ 
+ }.bind(this));
+};
+
+function connectDb(){
+  db.connect()
+ .then(function(uri){
+   console.log('Connected to ' + uri);
+ })
+}
+connectDb();
+ 
+// Export the mongodb connection instance
+module.exports = MongoDBAdapter;
