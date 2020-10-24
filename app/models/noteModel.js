@@ -37,6 +37,9 @@ const NoteSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    labels: {
+      type: [Object],   
+    },  
   },
   {
     timestamps: true,
@@ -107,6 +110,46 @@ class NoteModel {
    */
   find = (data, callback) => {
     return Note.findOne({userId: data}, callback);
+  };
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description Find a note
+   */
+  findNoteById = (data, callback) => {
+    return Note.findById(data, callback);
+  };
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description Put label to note
+   */
+  putLabelToNote = (data, callback) => {
+    Note.updateOne( {_id: data.noteId }, 
+      { $push: {labels: data}}, callback);
+  };
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description Update label data on a note
+   */
+  updateLabelToNote = (data, callback) => {
+    Note.updateOne( {_id: data.noteId, "labels.labelId": data.labelId }, 
+      { $set: {"labels.$.name": data.name}}, callback);
+  };
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description Delete label on a note
+   */
+  deleteLabelOnNote = (data, callback) => {
+    console.log(data);
+    Note.updateOne( {_id: data.noteId }, 
+      { $pull: {labels: {labelId: data.labelId}}}, callback);
   };
 }
 

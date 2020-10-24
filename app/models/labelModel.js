@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const note = require('./noteModel');
 
 const LabelSchema = mongoose.Schema(
   {
@@ -38,13 +39,19 @@ class LabelModel {
      * @params {callback function} callback
      * @description create a new label in the database
      */
-    createLabel = (data, callback) => {
-      const labelData = new Label({
-        name: data.name,
-        noteId: data.noteId,
-        userId: data.userId,
+    create = (data, callback) => {
+      note.findNoteById(data.noteId, (err, result) => {
+        if(err || result == null){
+          return callback(err, null);
+        }else {
+          const labelData = new Label({
+            name: data.name,
+            noteId: data.noteId,
+            userId: data.userId,
+          });
+          return labelData.save(callback);
+        }
       });
-      return labelData.save(callback);
     };
   
     /**
@@ -52,7 +59,7 @@ class LabelModel {
      * @params {callback function} callback
      * @description Update a label identified by the labelId in the request
      */
-    updateLabel = (data, callback) => {
+    update = (data, callback) => {
       return Label.findByIdAndUpdate(data._id, data.fields, { new: true }, callback);
     };
   
@@ -61,12 +68,12 @@ class LabelModel {
      * @params {callback function} callback
      * @description Delete a note with the specified noteId in the request
      */
-    deleteLabel = (labelId, callback) => {
+    delete = (labelId, callback) => {
       Label.findByIdAndDelete(labelId, (err, data) => {
         if (err || data == null) {
           return callback(err, null);
         } else {
-          return callback(null, "Label_deleted");
+          return callback(null, data);
         }
       });
     };
@@ -76,7 +83,7 @@ class LabelModel {
     * @params {callback function} callback
     * @description Get all labels of a logged in user on a note
     */
-    find = (data, callback) => {
+    read = (data, callback) => {
       return Label.findOne({noteId: data}, callback);
     };
   }
