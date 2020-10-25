@@ -48,7 +48,7 @@ class UserRegistration {
           responseResult.message = "Could not register a user";
           return res.status(422).send(responseResult);
         } else if (result == "user_exists") {
-          logger.log("error", + result);
+          logger.warn("warning" + result);
           responseResult.success = false;
           responseResult.message = "User already exists with this email id.";
           return res.status(404).send(responseResult);
@@ -82,7 +82,7 @@ class UserRegistration {
       };
       userService.loginUser(loginData, (err, result, token) => {
         if (err == "Verify_Email") {
-          logger.error('error' + err);
+          logger.warn('warning' + err);
           responseResult.success = false;
           responseResult.message = "Login failed.Verify your email first.";
           return res.status(422).send(responseResult);

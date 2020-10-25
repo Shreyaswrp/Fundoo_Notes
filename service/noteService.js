@@ -8,7 +8,14 @@ class NoteService {
    * @description create a note
    */
   createNote = (data, callback) => {
-    return Note.createNote(data, callback);
+    Note.createNote(data, (err, result) => {
+      if(err){
+        return callback(err, null);
+      }else {
+        cache.clearCache();
+        return callback(null,result);
+      }
+    });
   };
 
   /**
@@ -33,7 +40,14 @@ class NoteService {
    * @description update a note
    */
   updateNote = (data, callback) => {
-    Note.updateNote(data, callback);
+    Note.updateNote(data, (err, result) => {
+      if(err){
+        return callback(err, null);
+      }else {
+        cache.clearCache();
+        return callback(null,result);
+      }
+    });
   };
 
   /**
@@ -42,7 +56,14 @@ class NoteService {
    * @description delete a note
    */
   deleteNote = (data, callback) => {
-    Note.deleteNote(data, callback);
+    Note.deleteNote(data, (err, result) => {
+      if(err){
+        return callback(err, null);
+      }else {
+        cache.clearCache();
+        return callback(null,result);
+      }
+    });
   };
 
   /**

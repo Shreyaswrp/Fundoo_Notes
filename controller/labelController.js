@@ -44,7 +44,7 @@ class Label {
         userId: decodedValue.data,
       };
       labelService.createLabel(labelDetails, (err, data) => {
-        if (err) {
+        if (err || data == null){
           logger.error("error" + err);
           responseResult.success = false;
           responseResult.message = "Could not create a label";
@@ -71,7 +71,6 @@ class Label {
    * @params {object} res http response
    */
   updateLabel = (req, res) => {
-    console.log('in update');
     var responseResult = {};
     // Validate request
     if (!req.body) {

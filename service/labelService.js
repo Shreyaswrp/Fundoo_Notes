@@ -1,5 +1,6 @@
 const Label = require("../app/models/labelModel.js");
 const cache = require('../middleware/redisCache.js');
+const note = require('../app/models/noteModel');
 
 class LabelService {
   /**
@@ -8,7 +9,20 @@ class LabelService {
    * @description create a label
    */
   createLabel = (data, callback) => {
-    return Label.createLabel(data, callback);
+    Label.create(data, (err, result) => {
+      if(err || result == null){
+        return callback(err, null);
+      }else {
+        cache.clearCache();
+        const obj = {
+          noteId: result.noteId,
+          name: result.name,
+          labelId: result._id
+        }
+        note.putLabelToNote(obj, callback);
+        return callback(null,result);
+      }
+    });
   };
 
   /**
@@ -17,7 +31,20 @@ class LabelService {
    * @description update a label
    */
   updateLabel = (data, callback) => {
-    return Label.updateLabel(data, callback);
+    Label.update(data, (err, result) => {
+      if(err){
+        return callback(err, null);
+      }else {
+        const obj = {
+          noteId: result.noteId,
+          name: result.name,
+          labelId: result._id
+        }
+        note.updateLabelToNote(obj, callback);
+        cache.clearCache();
+        return callback(null,result);
+      }
+    });
   };
 
   /**
@@ -26,7 +53,20 @@ class LabelService {
    * @description delete a label
    */
   deleteLabel = (data, callback) => {
-    return Label.deleteLabel(data, callback);
+    Label.delete(data, (err, result) => {
+      if(err || result == null){
+        return callback(err, null);
+      }else {
+        const obj = {
+          noteId: result.noteId,
+          name: result.name,
+          labelId: result._id
+        }
+        note.deleteLabelOnNote(obj, callback);
+        cache.clearCache();
+        return callback(null,result);
+      }
+    });
   };
 
   /**
@@ -35,7 +75,7 @@ class LabelService {
    * @description get notes of a logged in user
    */
   getLabelsByUserId = (data, callback) => {
-    Label.find(data, (err, result) => {
+    Label.read(data, (err, result) => {
       if(err){
         return callback(err, null);
       }else {
