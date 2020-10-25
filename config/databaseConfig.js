@@ -13,10 +13,10 @@ require('dotenv/config');
 var blueBird    = require('bluebird');
 var mongoose    = require('mongoose');
 var debug       = require('debug');
-var d           = debug('mongo-db-instance');
+var d           = debug('mongo-db-connection-state');
 
 var db = new MongoDBAdapter(process.env.DB_CONNECTION, {useCreateIndex: true, useNewUrlParser: true , useUnifiedTopology: true  });
- 
+
 var isState = function(state){
  return mongoose.connection.readyState === mongoose.Connection.STATES[state];
 };
