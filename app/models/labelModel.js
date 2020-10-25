@@ -84,7 +84,7 @@ class LabelModel {
     * @description Get all labels of a logged in user on a note
     */
     read = (data, callback) => {
-      return Label.findOne({noteId: data}, callback);
+      return Label.find({noteId: data}, callback);
     };
   }
   
