@@ -1,15 +1,23 @@
 const jwt = require("jsonwebtoken");
-const User = require("../app/models/userModel.js");
 const utility = require("../utility/utility.js");
+const user = require('../controller/userController.js');
 
 //middleware to authorize user
 exports.authorizeUser = (req, res, next) => {
   var responseResult = {};
-  if (!req.headers.token) {
-    responseResult.success = false;
-    responseResult.message = "Not authorized to access to this route";
-    res.status(422).send(responseResult);
-  }
-  const token = utility.verifyToken(req.headers.token);
-  return User.findUserById(token.data, next);
+    if (!req.headers.token) {
+      responseResult.success = false;
+      responseResult.message = "Not authorized to access this route";
+      return res.status(422).send(responseResult);
+    }else {
+      const decodedValue = utility.verifyToken(req.headers.token);
+        console.log("99"+decodedValue);
+        if (!decodedValue) {
+          responseResult.success = false;
+          responseResult.message = "You are logged out.Please login again.";
+          return res.status(422).send(responseResult);
+        }else {
+          return user.getAuthorizedUser(decodedValue.data, next);
+        }
+    }
 };

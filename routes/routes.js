@@ -5,7 +5,6 @@ const note = require('../controller/noteController.js');
 const auth = require('../middleware/authorizeUser.js');
 const cache = require('../middleware/redisCache.js');
 const label = require('../controller/labelController.js');
-const { createLabel } = require('../app/models/labelModel.js');
 
 //register a new User
 router.post('/register', user.registerUser);
@@ -41,7 +40,7 @@ router.get('/find-user-notes', auth.authorizeUser, cache.getAllNotesOfUser, note
 router.post('/create-label', auth.authorizeUser, label.createLabel);
 
 //route to find labels of a logged in user on a particular note
-router.get('/find-labels', auth.authorizeUser, label.getUserLabels);
+router.get('/find-labels', auth.authorizeUser, cache.getAllLabels, label.getUserLabels);
 
 //route to update a label
 router.put('/update-label/:labelId', auth.authorizeUser, label.updateLabel);

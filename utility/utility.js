@@ -60,3 +60,11 @@ exports.validateNote = (message) => {
   });
   return schema.validate(message);
 };
+
+//validate label
+exports.validateLabel = (message) => {
+  const schema = Joi.object({
+    name: Joi.string().min(2).required(),
+  });
+  return schema.validate(message);
+};

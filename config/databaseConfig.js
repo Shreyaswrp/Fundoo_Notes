@@ -34,7 +34,7 @@ function MongoDBAdapter(uri, options){
 * @description Add connection listeners without adding more than one for each event.
 */
 MongoDBAdapter.prototype.addConnectionListener = function(event, cb){
- var listeners = mongoose.connection._events;
+ var listeners = mongoose.connection.on;
  if (!listeners || !listeners[event] || listeners[event].length === 0){
    mongoose.connection.once(event, cb.bind(this));
  }
@@ -76,6 +76,7 @@ MongoDBAdapter.prototype.connect = function(){
 * @return {Promise} Bluebird promise
 */
 MongoDBAdapter.prototype.disconnect = function(){
+  debugger;
  return new blueBird(function(resolve, reject){
    if (isState('disconnected') || isState('uninitialized')){
      d(DEBUG_ALREADY_DISCONNECTED, this.uri);

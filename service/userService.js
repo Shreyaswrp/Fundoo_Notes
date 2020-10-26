@@ -2,6 +2,8 @@ const utility = require("../utility/utility");
 const userModel = require("../app/models/userModel");
 const lib = require("../lib/sendMail");
 require("dotenv/config");
+const rabbitMQ = require('../MQ/rabbitMQ.js');
+const  mq  = new rabbitMQ();
 
 class UserService {
   /**
@@ -108,23 +110,24 @@ class UserService {
    */
   verifyEmail = (data, callback) => {
     userModel.findUser(data, (err, result) => {
-    if (err || result == null) {
+      if (err || result == null) {
         return callback(err, null);
-    } else {
-  const decodedValue = utility.verifyToken(data.token);
-  if (decodedValue.data == result.emailId) {
-    const mailContent = {
-      receiverEmail: result.emailId,
-      subject: "Email verification confirmation",
-      content: `<h2>Your email id has been verified.</h2>`,
-      };
-      lib.sendEmail(mailContent);
-      const contentToUpdate = {
-            emailId: data.emailId,
-            isEmailVerified: true,
-      };
-      return userModel.updateUserEmailVerification(contentToUpdate, callback);
-      }
+      } else {
+        const decodedValue = utility.verifyToken(data.token);
+        if (decodedValue.data == result.emailId) {
+          const mailContent = {
+            emailId: result.emailId,
+            subject: "Email verification confirmation",
+            message: `<h2>Your email id has been verified.</h2>`,
+          };
+          //mq.sendToQueue(mailContent);
+          mq.consumeFromQueue();
+          const contentToUpdate = {
+              emailId: data.emailId,
+              isEmailVerified: true,
+          };
+        return userModel.updateUserEmailVerification(contentToUpdate, callback);
+        }
       }
     });
   };
