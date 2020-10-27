@@ -35,25 +35,24 @@ class RabbitMq {
             }else {
                 // Ensure queue for messages
                 channel.assertQueue(QUEUE, {durable: true }, err => {
-                            if (err) {
-                                console.error(err.stack);
-                                return process.exit(1);
-                            }
-                            const message = {
-                                from: `${process.env.EMAIL_ID}`,
-                                emailId: content.emailId,
-                                subject: content.subject,
-                                message: content.message,
-                              };
-                            let sent = channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(message)));
-                                if (sent) {
-                                    console.log(sent);
-                                    return;
-                                } else {
-                                    channel.once('drain', () => next());
-                                }
-                        });
-                        
+                    if (err) {
+                        console.error(err.stack);
+                        return process.exit(1);
+                    }
+                    const message = {
+                        from: `${process.env.EMAIL_ID}`,
+                        emailId: content.emailId,
+                        subject: content.subject,
+                        message: content.message,
+                    };
+                    let sent = channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(message)));
+                        if (sent) {
+                            console.log(sent);
+                            return;
+                        } else {
+                            channel.once('drain', () => next());
+                        }
+                });
             }
         });
     }
