@@ -39,14 +39,23 @@ router.get('/find-user-notes', auth.authorizeUser, cache.getAllNotesOfUser, note
 //route to create a new label
 router.post('/create-label', auth.authorizeUser, label.createLabel);
 
+//route to create a new label on a note
+router.post('/create-label-note', auth.authorizeUser, label.createLabelOnNote);
+
 //route to find labels of a logged in user on a particular note
 router.get('/find-labels', auth.authorizeUser, cache.getAllLabels, label.getUserLabels);
 
 //route to update a label
 router.put('/update-label/:labelId', auth.authorizeUser, label.updateLabel);
 
+//route to update a label on a note
+router.put('/update-label-note/:labelId', auth.authorizeUser, label.updateLabelOnNote);
+
 //route to delete a note
 router.delete('/delete-label/:labelId', auth.authorizeUser, label.deleteLabel);
+
+//route to delete a note on a note
+router.delete('/delete-label-note/:labelId', auth.authorizeUser, label.deleteLabelOnNote);
 
 module.exports = router;
 
