@@ -1,6 +1,7 @@
 require("dotenv/config");
 const producer = require('./producer.js')
 const lib = require("../lib/sendMail");
+const QUEUE = "FundooApp";
 
 class Consumer {
 
@@ -13,13 +14,12 @@ class Consumer {
             }
             channel.prefetch(1);
             // Set up callback to handle messages received from the queue
-            channel.consume(process.env.QUEUE, data => {
+            channel.consume(QUEUE, data => {
                 if (data === null) {
                     return;
                 }
                 // Decode message contents
                 let message = JSON.parse(data.content.toString());
-                console.log(message);
                 const mailContent = {
                     receiverEmail: message.emailId,
                     subject: message.subject,
