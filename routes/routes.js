@@ -54,7 +54,7 @@ router.put('/update-label-note/:labelId', auth.authorizeUser, label.updateLabelO
 //route to delete a note
 router.delete('/delete-label/:labelId', auth.authorizeUser, label.deleteLabel);
 
-//route to delete a note on a note
+//route to delete a label on a note
 router.delete('/delete-label-note/:labelId', auth.authorizeUser, label.deleteLabelOnNote);
 
 module.exports = router;
