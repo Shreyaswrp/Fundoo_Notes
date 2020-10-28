@@ -2,8 +2,10 @@ const utility = require("../utility/utility");
 const userModel = require("../app/models/userModel");
 const lib = require("../lib/sendMail");
 require("dotenv/config");
-const rabbitMQ = require('../MQ/rabbitMQ.js');
-const  mq  = new rabbitMQ();
+const EventEmitter = require('events');
+const emitter = new EventEmitter();
+const producer = require('../MQ/producer');
+const consumer = require('../MQ/consumer');
 
 class UserService {
   /**
@@ -27,9 +29,9 @@ class UserService {
       const token = utility.generateToken(data.emailId);
       const mailContent = {
           receiverEmail: data.emailId,
-          subject: "Email to verify email address",
-          content: `<h2>Please click on given link to verify your email address</h2>
-                   <span>${process.env.CLIENT_URL}/activate/${token}</span>`,
+          subject: `Email to verify email address`,
+          content: `Please click on given link to verify your email address
+                   ${process.env.CLIENT_URL}/activate/${token}`,
       };
       lib.sendEmail(mailContent);
       return userModel.createUser(userDetails, callback);
@@ -76,8 +78,8 @@ class UserService {
         const mailContent = {
           receiverEmail: result.emailId,
           subject: "Email to reset password",
-          content: `<h2>Please click on given link to reset your password</h2>
-                     <span>${process.env.CLIENT_URL}/forgot-password/${token}</span>`,
+          content: `Please click on given link to reset your password
+                    ${process.env.CLIENT_URL}/forgot-password/${token}`,
         };
         lib.sendEmail(mailContent);
         return callback(null, result);
@@ -116,17 +118,23 @@ class UserService {
         const decodedValue = utility.verifyToken(data.token);
         if (decodedValue.data == result.emailId) {
           const mailContent = {
-            emailId: result.emailId,
-            subject: "Email verification confirmation",
-            message: `<h2>Your email id has been verified.</h2>`,
+            receiverEmail: result.emailId,
+            subject: `Email verification`,
+            content: `Your email id has been verified.`,
           };
-          //mq.sendToQueue(mailContent);
-          mq.consumeFromQueue();
+          emitter.on('SentToQueue', () => {
+            producer.sendToQueue(mailContent);
+          })
+          emitter.emit('SentToQueue');
+          emitter.on('ConsumeFromQueue', () => {
+            consumer.consumeFromQueue();
+          })
+          emitter.emit('ConsumeFromQueue');
           const contentToUpdate = {
               emailId: data.emailId,
               isEmailVerified: true,
           };
-        return userModel.updateUserEmailVerification(contentToUpdate, callback);
+      return userModel.updateUserEmailVerification(contentToUpdate, callback);
         }
       }
     });
@@ -140,5 +148,7 @@ class UserService {
   getAuthorizedUser = (data, callback) => {
     return userModel.findUserById(data, callback);
   }
+
+  
 }
 module.exports = new UserService();

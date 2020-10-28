@@ -14,12 +14,6 @@ class LabelService {
         return callback(err, null);
       }else {
         cache.clearCache();
-        const obj = {
-          noteId: result.noteId,
-          name: result.name,
-          labelId: result._id
-        }
-        note.putLabelToNote(obj, callback);
         return callback(null,result);
       }
     });
@@ -35,12 +29,6 @@ class LabelService {
       if(err){
         return callback(err, null);
       }else {
-        const obj = {
-          noteId: result.noteId,
-          name: result.name,
-          labelId: result._id
-        }
-        note.updateLabelToNote(obj, callback);
         cache.clearCache();
         return callback(null,result);
       }
@@ -57,12 +45,6 @@ class LabelService {
       if(err || result == null){
         return callback(err, null);
       }else {
-        const obj = {
-          noteId: result.noteId,
-          name: result.name,
-          labelId: result._id
-        }
-        note.deleteLabelOnNote(obj, callback);
         cache.clearCache();
         return callback(null,result);
       }
@@ -83,6 +65,54 @@ class LabelService {
         return callback(null,result);
       }
     });
+  }
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description create label on a note
+   */
+  createLabelOnNote = (data, callback) => {
+    Label.create(data, (err, result) => {
+      if(err || result == null){
+        return callback(err, null);
+      }else {
+        const labelData = {
+          noteId: result.noteId,
+          name: result.name,
+          userId: result.userId,
+          labelId: result._id,
+        }
+        return note.addLabelToNote(labelData, callback);
+      }
+    });
+  }
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description update label on a note
+   */
+  updateLabelOnNote = (data, callback) => {
+    const labelData = {
+      noteId: data.noteId,
+      name: data.name,
+      labelId: data._id
+    }
+    note.updateLabelToNote(labelData, callback);
+  }
+
+  /**
+   * @params {object} data
+   * @params {callback function} callback
+   * @description delete label on a note
+   */
+  deleteLabelOnNote = (data, callback) => {
+    const labelData = {
+      noteId: data.noteId,
+      labelId: data._id
+    }
+    note.deleteLabelOnNote(labelData, callback);
   }
 }
 
