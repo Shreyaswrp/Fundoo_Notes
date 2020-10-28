@@ -14,7 +14,6 @@ const NoteSchema = mongoose.Schema(
     userId: {
       type: Schema.Types.ObjectId,
       ref: "users",
-      required: true,
     },
     reminder: {
       type: String,
@@ -39,6 +38,9 @@ const NoteSchema = mongoose.Schema(
     },
     labels: {
       type: [Object],   
+    },
+    collaborators: {
+      type: [Object],
     },  
   },
   {
@@ -124,11 +126,21 @@ class NoteModel {
   /**
    * @params {object} data
    * @params {callback function} callback
-   * @description Put label to note
+   * @description Add label to note
    */
-  putLabelToNote = (data, callback) => {
+  addLabelToNote = (data, callback) => {
+    const dataLabel = {
+      name: data.name,
+      labelId: data._id,
+    }
     Note.updateOne( {_id: data.noteId }, 
-      { $push: {labels: data}}, callback);
+      { $push: {labels: dataLabel}}, (err, result) => {
+        if(err) {
+          return callback(err, null);
+        }else {
+          return callback(null, dataLabel);
+        }
+      });
   };
 
   /**
@@ -137,8 +149,19 @@ class NoteModel {
    * @description Update label data on a note
    */
   updateLabelToNote = (data, callback) => {
+    const updatedLabelData = {
+      noteId: data.noteId,
+      name: data.name,
+      labelId: data.labelId
+    }
     Note.updateOne( {_id: data.noteId, "labels.labelId": data.labelId }, 
-      { $set: {"labels.$.name": data.name}}, callback);
+      { $set: {"labels.$.name": data.name}}, (err, result) => {
+        if(err) {
+          return callback(err, null);
+        }else {
+          return callback(null, updatedLabelData);
+        }
+      });
   };
 
   /**
@@ -147,10 +170,8 @@ class NoteModel {
    * @description Delete label on a note
    */
   deleteLabelOnNote = (data, callback) => {
-    console.log(data);
     Note.updateOne( {_id: data.noteId }, 
       { $pull: {labels: {labelId: data.labelId}}}, callback);
-  };
+  }
 }
-
 module.exports = new NoteModel();

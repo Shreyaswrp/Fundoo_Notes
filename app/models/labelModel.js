@@ -12,12 +12,10 @@ const LabelSchema = mongoose.Schema(
     noteId: {
       type: Schema.Types.ObjectId,
       ref: "notes",
-      required: true,
     },
     userId: {
       type: Schema.Types.ObjectId,
       ref: "users",
-      required: true,
     },
     isDeleted: {
       type: Boolean,
@@ -39,18 +37,12 @@ class LabelModel {
      * @description create a new label in the database
      */
     create = (data, callback) => {
-      note.findNoteById(data.noteId, (err, result) => {
-        if(err || result == null){
-          return callback(err, null);
-        }else {
           const labelData = new Label({
             name: data.name,
-            noteId: data.noteId,
             userId: data.userId,
+            noteId: data.noteId
           });
           return labelData.save(callback);
-        }
-      });
     };
   
     /**
@@ -61,12 +53,22 @@ class LabelModel {
     update = (data, callback) => {
       return Label.findByIdAndUpdate(data._id, data.fields, { new: true }, callback);
     };
-  
+    
+    /**
+     * @params {object} data
+     * @params {callback function} callback
+     * @description Update a label identified by the labelId in the request
+     */
+    updateLabelName = (data, callback) => {
+      return Label.findByIdAndUpdate(data._id, data, { new: true }, callback);
+    };
+
     /**
      * @params {object} data
      * @params {callback function} callback
      * @description Delete a note with the specified noteId in the request
      */
+    
     delete = (labelId, callback) => {
       Label.findByIdAndDelete(labelId, (err, data) => {
         if (err || data == null) {
@@ -82,8 +84,8 @@ class LabelModel {
     * @params {callback function} callback
     * @description Get all labels of a logged in user on a note
     */
-    read = (data, callback) => {
-      return Label.find({noteId: data}, callback);
+    read = (callback) => {
+      return Label.find(callback);
     };
   }
   
