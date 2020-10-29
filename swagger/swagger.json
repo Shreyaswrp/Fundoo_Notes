@@ -28,9 +28,14 @@
     "produces": [
       "application/json"
     ],
-    "security": {
-        "- api_key": "[]"
-    },    
+    "securityDefinitions": {
+        "user_api_key": {
+        "type": "apiKey",
+        "name": "x-access-token",
+        "in": "header",
+        "description": "authorised token after USER login"
+        }
+        },    
     "paths": {
       "/register": {
         "post": {
@@ -105,16 +110,6 @@
             "Users"
           ],
           "description": "Verify user's email id in system",
-          "headers": [
-            {
-              "name": "user",
-              "in": "headers",
-              "description": "Verify email id of the user",
-              "schema": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          ],
           "parameters": [
             {
               "name": "user",
@@ -129,9 +124,11 @@
           "produces": [
             "application/json"
           ],
-          "security": {
-            "APIKeyQueryParam": []
-          },
+          "security": [
+            {
+            "user_api_key": []
+            }
+            ],
           "responses": {
             "200": {
               "description": "Email Verification Success",
@@ -246,14 +243,6 @@
             }
         }
       }
-    },
-
-    "securityDefinitions": {
-        "api_key":{
-    "type": "apiKey",
-    "name": "api_key",
-    "in": "header",
-    "description": "Requests should pass an api_key header."
     }
-    }   
+  
 }
