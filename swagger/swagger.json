@@ -1,0 +1,259 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "FundooApp API",
+      "description": "Find out how your APIs work",
+      "license": {
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+      }
+    },
+    "host": "localhost:5000",
+    "basePath": "/",
+    "tags": [
+      {
+        "name": "Users",
+        "description": "API for users in the system"
+      }
+
+    ],
+    "schemes": [
+      "http",
+      "https"
+    ],
+    "consumes": [
+      "application/json"
+    ],
+    "produces": [
+      "application/json"
+    ],
+    "security": {
+        "- api_key": "[]"
+    },    
+    "paths": {
+      "/register": {
+        "post": {
+          "summary": "Register a new user",
+          "tags": [
+            "Users"
+          ],
+          "description": "Create a new user in system",
+          "parameters": [
+            {
+              "name": "user",
+              "in": "body",
+              "description": "Register a new user",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "Registration Success",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            },
+            "500":{
+              "description": "User Registration failed!!"
+            }
+          }
+        }
+      },
+      "/login": {
+        "post": {
+          "summary": "Login user",
+          "tags": [
+            "UsersLogin"
+          ],
+          "description": "Login user in system",
+          "parameters": [
+            {
+              "name": "user",
+              "in": "body",
+              "description": "Login user",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "Login Success",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            },
+            "500":{
+              "description": "User login failed!!"
+            }
+          }
+        }
+      },
+      "/verify-email": {
+        "post": {
+          "summary": "Verify user's email id",
+          "tags": [
+            "Users"
+          ],
+          "description": "Verify user's email id in system",
+          "headers": [
+            {
+              "name": "user",
+              "in": "headers",
+              "description": "Verify email id of the user",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user",
+              "in": "body",
+              "auth": "header",
+              "description": "Verify email id",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "security": {
+            "APIKeyQueryParam": []
+          },
+          "responses": {
+            "200": {
+              "description": "Email Verification Success",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            },
+            "500":{
+              "description": "Email Verification failed!!"
+            }
+          }
+        }
+      },
+      "/forgot-password": {
+        "post": {
+          "summary": "Send token to reset password when it's forgotten",
+          "tags": [
+            "Users"
+          ],
+          "description": "Forgot password token",
+          "parameters": [
+            {
+              "name": "user",
+              "in": "body",
+               "auth": "header",
+              "description": "Forgot password",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "Forgot password Success",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            },
+            "500":{
+              "description": "Forgot password operation failed!!"
+            }
+          }
+        }
+      },
+      "/reset-password": {
+        "post": {
+          "summary": "Reset password when it's forgotten",
+          "tags": [
+            "Users"
+          ],
+          "description": "Reset password",
+          "headers": [
+            {
+              "name": "user",
+              "in": "headers",
+              "description": "Reset password",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user",
+              "in": "body",
+              "description": "Reset password",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "responses": {
+            "200": {
+              "description": "Reset password Success",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            },
+            "500":{
+              "description": "Reset password operation failed!!"
+            }
+          }
+        }
+      }
+
+    },
+
+    "definitions": {
+
+      "User": {
+        "properties": {
+            "firstName": {
+                "type": "string"
+            },
+            "lastName": {
+                "type": "string"
+            },
+            "emailId": {
+            "type": "string"
+            },
+            "password": {
+            "type": "string"
+            },
+            "token": {
+                "type": "string"
+            }
+        }
+      }
+    },
+
+    "securityDefinitions": {
+        "api_key":{
+    "type": "apiKey",
+    "name": "api_key",
+    "in": "header",
+    "description": "Requests should pass an api_key header."
+    }
+    }   
+}
