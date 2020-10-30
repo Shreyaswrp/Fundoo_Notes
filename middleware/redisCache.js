@@ -56,6 +56,29 @@ class RedisCache {
     });
   };
 
+  //get all the emailids from cache
+  getAllEmailIds = (req, res, next) => {
+    var responseResult = {};
+    redis_client.get("emailids", (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        if (result != null) {
+          responseResult.success = true;
+          responseResult.data = JSON.parse(result);
+          responseResult.message = "EmailIds found successfully from cache.";
+          return res.status(200).send(responseResult);
+        }
+    }
+      return next();
+    });
+  };
+
+  //set all the registered eamilids to cache
+  setAllEmailIds = (data) => {
+    redis_client.setex("emailids", 3600, JSON.stringify(data));
+  };
+
   //set all the notes to cache
   setAllNotes = (data) => {
     redis_client.setex("notes", 3600, JSON.stringify(data));

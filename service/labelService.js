@@ -5,7 +5,7 @@ const note = require('../app/models/noteModel');
 class LabelService {
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description create a label
    */
   createLabel = (data, callback) => {
@@ -21,7 +21,7 @@ class LabelService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description update a label
    */
   updateLabel = (data, callback) => {
@@ -37,7 +37,7 @@ class LabelService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description delete a label
    */
   deleteLabel = (data, callback) => {
@@ -53,11 +53,11 @@ class LabelService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description get notes of a logged in user
    */
-  getLabelsByUserId = (data, callback) => {
-    Label.read(data, (err, result) => {
+  getAllLabels = (callback) => {
+    Label.read( (err, result) => {
       if(err){
         return callback(err, null);
       }else {
@@ -69,7 +69,7 @@ class LabelService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description create label on a note
    */
   createLabelOnNote = (data, callback) => {
@@ -77,42 +77,51 @@ class LabelService {
       if(err || result == null){
         return callback(err, null);
       }else {
-        const labelData = {
-          noteId: result.noteId,
-          name: result.name,
-          userId: result.userId,
-          labelId: result._id,
-        }
-        return note.addLabelToNote(labelData, callback);
+        return note.addLabelToNote(result, callback);
       }
     });
   }
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description update label on a note
    */
   updateLabelOnNote = (data, callback) => {
-    const labelData = {
-      noteId: data.noteId,
-      name: data.name,
-      labelId: data._id
-    }
-    note.updateLabelToNote(labelData, callback);
+    Label.updateLabelName(data, (err, result) => {
+      if(err){
+        return callback(err, null);
+      }else {
+        note.updateLabelToNote(result, callback);
+      }
+    });
   }
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description delete label on a note
    */
   deleteLabelOnNote = (data, callback) => {
-    const labelData = {
-      noteId: data.noteId,
-      labelId: data._id
-    }
-    note.deleteLabelOnNote(labelData, callback);
+    note.findAllLabelsLabelOnNote((err, result) => {
+      if(err) {
+        return callback(err, null);
+      }else {
+        const newArray = [];
+        result.forEach(element => {
+          element.forEach( index => {
+          if(index._id != data._id) {
+              newArray.push(index);
+            }
+          });
+        });
+        const labelToUpdate = {
+          _id: data.noteId,
+          labels: newArray
+        }
+        note.updateLabelOnNote(labelToUpdate, callback);
+      }
+    });
   }
 }
 

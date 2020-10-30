@@ -11,7 +11,6 @@ exports.authorizeUser = (req, res, next) => {
       return res.status(422).send(responseResult);
     }else {
       const decodedValue = utility.verifyToken(req.headers.token);
-        console.log("99"+decodedValue);
         if (!decodedValue) {
           responseResult.success = false;
           responseResult.message = "You are logged out.Please login again.";

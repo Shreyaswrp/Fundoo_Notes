@@ -6,11 +6,12 @@ const EventEmitter = require('events');
 const emitter = new EventEmitter();
 const producer = require('../MQ/producer');
 const consumer = require('../MQ/consumer');
+const cache = require('../middleware/redisCache.js');
 
 class UserService {
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description register a new user in the database
    */
   registerUser = (data, callback) => {
@@ -26,6 +27,7 @@ class UserService {
     } else if (result != null) {
       return callback(null, "user_exists");
     } else {
+      cache.clearCache();
       const token = utility.generateToken(data.emailId);
       const mailContent = {
           receiverEmail: data.emailId,
@@ -41,7 +43,7 @@ class UserService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description let a user login by providing correct id and password
    */
   loginUser = (data, callback) => {
@@ -66,7 +68,7 @@ class UserService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description send reset link in case the password is forgotten
    */
   forgotPassword = (data, callback) => {
@@ -89,7 +91,7 @@ class UserService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description update the password by the reset link provided
    */
   resetPassword = (data, callback) => {
@@ -107,7 +109,7 @@ class UserService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description verfify email address of a user
    */
   verifyEmail = (data, callback) => {
@@ -142,7 +144,7 @@ class UserService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description get authorized user
    */
   getAuthorizedUser = (data, callback) => {

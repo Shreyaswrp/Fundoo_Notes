@@ -5,6 +5,7 @@ const note = require('../controller/noteController.js');
 const auth = require('../middleware/authorizeUser.js');
 const cache = require('../middleware/redisCache.js');
 const label = require('../controller/labelController.js');
+const collab = require('../controller/collaboratorController.js');
 
 //register a new User
 router.post('/register', user.registerUser);
@@ -56,6 +57,18 @@ router.delete('/delete-label/:labelId', auth.authorizeUser, label.deleteLabel);
 
 //route to delete a label on a note
 router.delete('/delete-label-note/:labelId', auth.authorizeUser, label.deleteLabelOnNote);
+
+//route to find all registeredEmailIds
+router.get('/find-emailids', auth.authorizeUser, cache.getAllEmailIds, collab.findAllRegisteredEmails);
+
+//route to create a new collaborator
+router.post('/create-collab-note', auth.authorizeUser, collab.createCollaboratorOnNote);
+
+//route to delete a collaborator
+router.delete('/delete-collab-note', auth.authorizeUser, collab.deleteCollaboratorOnNote);
+
+//route to get all collaborators
+router.get('/find-collab-note', auth.authorizeUser, collab.getCollaborators);
 
 module.exports = router;
 

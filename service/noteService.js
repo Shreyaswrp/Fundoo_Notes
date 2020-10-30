@@ -4,7 +4,7 @@ const cache = require('../middleware/redisCache.js');
 class NoteService {
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description create a note
    */
   createNote = (data, callback) => {
@@ -20,7 +20,7 @@ class NoteService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description find all notes
    */
   findAllNotes = (callback) => {
@@ -36,7 +36,7 @@ class NoteService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description update a note
    */
   updateNote = (data, callback) => {
@@ -52,7 +52,7 @@ class NoteService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description delete a note
    */
   deleteNote = (data, callback) => {
@@ -68,11 +68,11 @@ class NoteService {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description get notes of a logged in user
    */
   getNotesByUserId = (data, callback) => {
-    return Note.find(data, (err, result) => {
+    Note.find(data, (err, result) => {
       if(err){
         return callback(err, null);
       }else {
