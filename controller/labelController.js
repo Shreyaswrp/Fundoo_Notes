@@ -22,7 +22,7 @@ class Label {
   /**
    * @description controller to past request to create label to service
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   createLabel = (req, res) => {
     var responseResult = {};
@@ -40,7 +40,6 @@ class Label {
       const decodedValue = utility.verifyToken(req.headers.token);
       const labelDetails = {
         name: req.body.name,
-        noteId: req.headers.note,
         userId: decodedValue.data,
       };
       labelService.createLabel(labelDetails, (err, data) => {
@@ -68,7 +67,7 @@ class Label {
   /**
    * @description Update labels from the database.
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   updateLabel = (req, res) => {
     var responseResult = {};
@@ -108,7 +107,7 @@ class Label {
   /**
    * @description Delete labels from the database.
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   deleteLabel = (req, res) => {
     var responseResult = {};
@@ -137,12 +136,11 @@ class Label {
   /**
    * @description Get all the notes for the logged in user
    * @param {Object} req
-   * @param {Object} res
+   * @returns {Object} res
    */
   getUserLabels = (req, res) => {
     var responseResult = {};
-    let noteId = req.headers.note
-    labelService.getLabelsByUserId(noteId, (err, result) => {
+    labelService.getAllLabels( (err, result) => {
       if (err) {
         logger.error("error" + err);
         responseResult.success = false;
@@ -156,6 +154,89 @@ class Label {
         return res.status(200).send(responseResult);
       }  
     })
+  }
+
+  /**
+   * @description Create a label on a note
+   * @param {Object} req
+   * @returns {Object} res
+   */
+  createLabelOnNote = (req, res) => {
+    var responseResult = {};
+    const decodedValue = utility.verifyToken(req.headers.token);
+    const labelData = {
+      noteId: req.body.noteId,
+      name: req.body.name,
+      userId: decodedValue.data,
+    }
+    labelService.createLabelOnNote(labelData, (err, result) => {
+      if(err) {
+        logger.error("error" + err);
+        responseResult.success = false;
+        responseResult.message = "Could not create a label on the note";
+        return res.status(422).send(responseResult);
+      }else {
+        logger.info("response data" + result);
+        responseResult.success = true;
+        responseResult.data = result;
+        responseResult.message = "Label created successfully on the note.";
+        return res.status(200).send(responseResult);
+      }
+    });
+  }
+
+  /**
+   * @description Create a label on a note
+   * @param {Object} req
+   * @returns {Object} res
+   */
+  updateLabelOnNote = (req, res) => {
+    var responseResult = {};
+    const labelData = {
+      noteId: req.body.noteId,
+      name: req.body.name,
+      _id: req.params.labelId
+    }
+    labelService.updateLabelOnNote(labelData, (err, result) => {
+      if(err) {
+        logger.error("error" + err);
+        responseResult.success = false;
+        responseResult.message = "Could not update a label on the note";
+        return res.status(422).send(responseResult);
+      }else {
+        logger.info("response data" + result);
+        responseResult.success = true;
+        responseResult.data = result;
+        responseResult.message = "Label updated successfully on the note.";
+        return res.status(200).send(responseResult);
+      }
+    });
+  }
+
+  /**
+   * @description Create a label on a note
+   * @param {Object} req
+   * @returns {Object} res
+   */
+  deleteLabelOnNote = (req, res) => {
+    var responseResult = {};
+    const labelData = {
+      noteId: req.body.noteId,
+      _id: req.params.labelId,
+    }
+    labelService.deleteLabelOnNote(labelData, (err, result) => {
+      if(err) {
+        logger.error("error" + err);
+        responseResult.success = false;
+        responseResult.message = "Could not delete a label on the note";
+        return res.status(422).send(responseResult);
+      }else {
+        logger.info("response data" + result);
+        responseResult.success = true;
+        responseResult.message = "Label delete successfully on the note.";
+        return res.status(200).send(responseResult);
+      }
+    });
   }
 }
 module.exports = new Label();

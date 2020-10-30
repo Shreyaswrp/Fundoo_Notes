@@ -21,7 +21,7 @@ class UserRegistration {
   /**
    * @description controller to past request to register user to service
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   registerUser = (req, res) => {
     var responseResult = {};
@@ -70,7 +70,7 @@ class UserRegistration {
   /**
    * @description controller to past request to login user to service
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   loginUser = (req, res) => {
     var responseResult = {};
@@ -109,7 +109,7 @@ class UserRegistration {
   /**
    * @description controller to past request to forgot password to service
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   forgotPassword = (req, res) => {
     var responseResult = {};
@@ -141,7 +141,7 @@ class UserRegistration {
   /**
    * @description controller to past request to forgot password to service
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   resetPassword = (req, res) => {
     var responseResult = {};
@@ -174,7 +174,7 @@ class UserRegistration {
   /**
    * @description controller to past request to verify email id to service
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   verifyEmailAddress = (req, res) => {
     var responseResult = {};
@@ -205,7 +205,7 @@ class UserRegistration {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description get authorized user
    */
   getAuthorizedUser = (data, callback) => {

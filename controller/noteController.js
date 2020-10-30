@@ -22,7 +22,7 @@ class Note {
   /**
    * @description controller to past request to create note to service
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   createNote = (req, res) => {
     var responseResult = {};
@@ -73,7 +73,7 @@ class Note {
   /**
    * @description Retrieve and return all notes from the database.
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   findAllNotes = (req, res) => {
     var responseResult = {};
@@ -103,7 +103,7 @@ class Note {
   /**
    * @description Update notes from the database.
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   updateNote = (req, res) => {
     var responseResult = {};
@@ -143,7 +143,7 @@ class Note {
   /**
    * @description Delete notes from the database.
    * @param {object} req http request
-   * @params {object} res http response
+   * @returns {object} res http response
    */
   deleteNote = (req, res) => {
     var responseResult = {};
@@ -171,7 +171,7 @@ class Note {
   /**
    * @description Get all the notes for the logged in user
    * @param {Object} req
-   * @param {Object} res
+   * @returns {Object} res
    */
   getUserNotes = (req, res) => {
     var responseResult = {};
