@@ -44,7 +44,7 @@ const userModel = mongoose.model("User", UserSchema);
 class UserModel {
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description create a new user in the database
    */
   createUser = (data, callback) => {
@@ -59,7 +59,28 @@ class UserModel {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
+   * @description find all users in the database
+   */
+  getAllUsers = (data, callback) => {
+    let emailIdArray = [];
+     userModel.find((err, result) => {
+         if(err) {
+             return callback(err, null);
+         }else {
+             result.forEach(element => {
+                 if(element._id != data) {
+                     emailIdArray.push(element.emailId);
+                 }
+             });
+             return callback(null, emailIdArray);
+         }
+     });
+ }
+
+  /**
+   * @params {object} data
+   * @returns {callback function} callback
    * @description find a user in the database
    */
   findUser = (data, callback) => {
@@ -68,8 +89,17 @@ class UserModel {
 
   /**
    * @params {object} data
+   * @returns {callback function} callback
+   * @description find all users in the database
+   */
+  find = (callback) => {
+    return userModel.find(callback);
+  };
+
+  /**
+   * @params {object} data
    * @params {callback function} callback
-   * @description find a user in the database
+   * @description find a user in the database by it's id
    */
   findUserById = (data, callback) => {
     return userModel.findById(data, callback);
@@ -77,7 +107,7 @@ class UserModel {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description update user's password in the database
    */
   updateUser = (data, callback) => {
@@ -89,7 +119,7 @@ class UserModel {
 
   /**
    * @params {object} data
-   * @params {callback function} callback
+   * @returns {callback function} callback
    * @description update user's email verification field in the database
    */
   updateUserEmailVerification = (data, callback) => {
