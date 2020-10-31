@@ -39,9 +39,9 @@ class Producer {
           }
           const message = {
             from: `${process.env.EMAIL_ID}`,
-            emailId: content.emailId,
+            emailId: content.receiverEmail,
             subject: content.subject,
-            message: content.message,
+            message: content.content,
           };
           let sent = channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(message)));
           if (sent) {

@@ -48,17 +48,16 @@ class CollaboratorService {
    * @description delete collaborator on a note
    */
   deleteCollaboratorOnNote = (data, callback) => {
-    note.findAllCollaboratorsOnNote((err, result) => {
+    note.findCollaboratorsOnNote(data.noteId, (err, result) => {
       if(err) {
         return callback(err, null);
       }else {
         const newArray = [];
         result.forEach(element => {
-          element.forEach( index => {
-          if(index.collaboratorEmail != data.collaboratorEmail) {
+          if(element.collaboratorEmail != data.collaboratorEmail) {
               newArray.push(index);
             }
-          });
+          
         });
         const collabToUpdate = {
           _id: data.noteId,

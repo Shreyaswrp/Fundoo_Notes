@@ -7,6 +7,7 @@ const emitter = new EventEmitter();
 const producer = require('../MQ/producer');
 const consumer = require('../MQ/consumer');
 const cache = require('../middleware/redisCache.js');
+const logger = require("../config/logger");
 
 class UserService {
   /**
@@ -35,7 +36,7 @@ class UserService {
           content: `Please click on given link to verify your email address
                    ${process.env.CLIENT_URL}/activate/${token}`,
       };
-      lib.sendEmail(mailContent);
+      lib.sendEmail(mailContent, callback);
       return userModel.createUser(userDetails, callback);
     }
   });
@@ -83,7 +84,7 @@ class UserService {
           content: `Please click on given link to reset your password
                     ${process.env.CLIENT_URL}/forgot-password/${token}`,
         };
-        lib.sendEmail(mailContent);
+        lib.sendEmail(mailContent, callback);
         return callback(null, result);
       }
     });
