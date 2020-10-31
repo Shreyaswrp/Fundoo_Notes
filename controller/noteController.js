@@ -106,6 +106,7 @@ class Note {
    * @returns {object} res http response
    */
   updateNote = (req, res) => {
+    console.log(req.params.noteId);
     var responseResult = {};
     // Validate request
     if (!req.body) {

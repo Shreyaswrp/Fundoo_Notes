@@ -67,7 +67,7 @@ const utility = require("../utility/utility");
       if(err || result == null) {
         logger.error("error" + err);
         responseResult.success = false;
-        responseResult.message = "Could not create a collaborator on the note";
+        responseResult.message = "Could not create a collaborator on the note.The email id is not registered.";
         return res.status(422).send(responseResult);
       } else {
         logger.info("response data" + result);

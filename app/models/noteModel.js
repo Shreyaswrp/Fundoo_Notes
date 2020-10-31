@@ -155,12 +155,16 @@ class NoteModel {
    * @description Add collaborator to note
    */
   addCollaboratorToNote = (data, callback) => {
+    const collabData = {
+      collaboratorId: data.userId,
+      collaboratorEmail: data.collaboratorEmail
+    }
     Note.updateOne( {_id: data.noteId }, 
-      { $addToSet: {collaborators: data}}, (err, result) => {
+      { $addToSet: {collaborators: collabData}}, (err, result) => {
         if(err) {
           return callback(err, null);
         }else {
-          return callback(null, data);
+          return callback(null, collabData);
         }
     });
   };
