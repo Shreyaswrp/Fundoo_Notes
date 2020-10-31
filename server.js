@@ -20,11 +20,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const routes = require('./routes/routes');
 const logger = require('./config/logger');
-const dbConfig = require('./config/databaseConfig');
-const env = require('dotenv/config');
-const clearCache = require('./middleware/redisCache');
+require('./config/databaseConfig');
+require('dotenv/config');
+require('./middleware/redisCache');
 const cors = require('cors');
-
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger/swagger.json');
+ 
 // create express app
 const app = express();
 
@@ -38,8 +40,10 @@ app.use(cors());
 
 app.use(routes);
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 //Define a simple route to display Message at the homepage
-app.get('/', (req, res) => {
+app.get('/', (res) => {
         res.json("Welcome to Fundoo Notes application.");
 });
 
